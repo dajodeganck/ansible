@@ -1,15 +1,13 @@
----
-- name: "Ansible 101"
-  hosts: switches
-  gather_facts: no
-  vars:
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
-  tasks:
-    - name: Show Version
-      cisco.ios.ios_command:
-        commands: show version
-      register: output  # This stores the output in a variable named 'output'
+- name: "Configure switch_01"
+  hosts: switch_01  # Target only switch_01
+  gather_facts: yes  # Gather facts before running tasks (optional)
 
-    - name: Print output
+  tasks:
+    - name: Show interface status
+      cisco.ios.ios_command:
+        commands: show ip interface brief
+      register: interface_status
+
+    - name: Print interface status
       debug:
-        msg: "{{ output.stdout_lines }}"  # This prints the output
+        msg: "{{ interface_status.stdout_lines }}"
