@@ -1,12 +1,14 @@
 ---
-- hosts: SW_L3_2
-  connection: network_cli
-  become: true  # Enable privileged mode
-  become_method: enable  # Use 'enable' command
-  become_options:  # Options for entering privileged mode
-    password: muis
+- name: "Ansible 101"
+  hosts: switches
+  gather_facts: no
 
   tasks:
-    - name: Ping switch
-      ping:
-        dest: 10.10.10.15
+    - name: Show Version
+      cisco.ios.ios_command:
+        commands: show version
+      register: output  # This stores the output in a variable named 'output'
+
+    - name: Print output
+      debug:
+        msg: "{{ output.stdout_lines }}"  # This prints the output
