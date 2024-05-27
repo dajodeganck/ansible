@@ -1,13 +1,14 @@
-- name: "Configure switch_01"
-  hosts: switch_01  # Target only switch_01
-  gather_facts: yes  # Gather facts before running tasks (optional)
+---
+- name: "Ansible 101"
+  hosts: switches
+  gather_facts: no
 
   tasks:
-    - name: Show interface status
+    - name: Show Version
       cisco.ios.ios_command:
-        commands: show ip interface brief
-      register: interface_status
+        commands: show version
+      register: output
 
-    - name: Print interface status
+    - name: Print output
       debug:
-        msg: "{{ interface_status.stdout_lines }}"
+        msg: "{{ output.stdout_lines }}"
