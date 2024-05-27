@@ -1,9 +1,14 @@
 ---
-- name: Ping Cisco Switch
-  hosts: cisco_switch
+- name: "Ansible 101"
+  hosts: switches
   gather_facts: no
-  connection: network_cli
+
   tasks:
-    - name: Ping 8.8.8.8 from switch
-      ios_ping:
-        dest: 8.8.8.8
+    - name: Show Version
+      cisco.ios.ios_command:
+        commands: show version
+      register: output  # This stores the output in a variable named 'output'
+
+    - name: Print output
+      debug:
+        msg: "{{ output.stdout_lines }}"  # This prints the output
