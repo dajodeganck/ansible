@@ -1,6 +1,6 @@
 ---
 - name: "Ansible 101"
-  hosts: switches
+  hosts: 10.10.10.15
   gather_facts: no
   vars:
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
