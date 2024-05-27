@@ -1,9 +1,9 @@
 ---
-- hosts: SW_L3_2  # Indent this line one level (same as ---)
+- hosts: SW_L3_2
   connection: network_cli
-  become: true
-  become_method: enable
-  become_options:
+  become: true  # Enable privileged mode
+  become_method: enable  # Use 'enable' command
+  become_options:  # Options for entering privileged mode
     password: muis
 
   tasks:
