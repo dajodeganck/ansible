@@ -2,13 +2,8 @@
 - name: Ping Cisco Switch
   hosts: cisco_switch
   gather_facts: no
+  connection: network_cli
   tasks:
     - name: Ping 8.8.8.8 from switch
-      cisco.ios.ios_ping:
+      ios_ping:
         dest: 8.8.8.8
-        count: 4
-      register: ping_result
-
-    - name: Display ping result
-      debug:
-        var: ping_result
