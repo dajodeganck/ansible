@@ -1,5 +1,5 @@
 ---
-- hosts: SW_L3_2
+- hosts: SW_L3_2  # Indent this line one level (same as ---)
   connection: network_cli
   become: true
   become_method: enable
