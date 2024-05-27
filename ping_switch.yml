@@ -1,7 +1,16 @@
----
 - name: "Ansible 101"
   hosts: switches
   gather_facts: no
+
+  vars:
+    ansible_connection: network_cli
+    ansible_network_os: cisco.ios.ios
+    ansible_become: yes
+    ansible_become_method: enable
+    ansible_user: admin
+    ansible_password: ratje
+    ansible_become_password: muis
+    ansible_network_cli_transport: telnet
 
   tasks:
     - name: Show Version
