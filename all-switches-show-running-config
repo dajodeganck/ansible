@@ -22,44 +22,45 @@
     - name: Create temporary file with running config
       copy:
         content: "{{ job_result.results[0].stdout if job_result.results is defined and job_result.results[0].stdout is defined else 'No results found' }}"
-        dest: "/tmp/{{ inventory_hostname }}_backup.txt"
+        dest: "/home/user/backup/{{ inventory_hostname }}_backup.txt"
 
     - name: Ensure the local git repository exists
-      command: git init /tmp
+      command: git init /home/user/backup
       args:
-        creates: /tmp/.git
+        creates: /home/user/backup/.git
       delegate_to: localhost
 
-    - name: Add new config file to git
-      command: git add /tmp/{{ inventory_hostname }}_backup.txt
+    - name: Change working directory to git repository
+      command: chdir=/home/user/backup git add {{ inventory_hostname }}_backup.txt
       delegate_to: localhost
 
     - name: Commit the new config file
-      command: git commit -m "Add running config for {{ inventory_hostname }}"
+      command: chdir=/home/user/backup git commit -m "Add running config for {{ inventory_hostname }}"
       delegate_to: localhost
       ignore_errors: yes
 
     - name: Set up GitHub remote
-      command: git remote add origin https://github.com/dajodeganck/ansible.git
+      command: chdir=/home/user/backup git remote add origin https://github.com/dajodeganck/ansible.git
       delegate_to: localhost
       args:
-        creates: /tmp/.git/config
+        creates: /home/user/backup/.git/config
+      ignore_errors: yes
 
     - name: Push the commit to GitHub
-      command: git push origin main
+      command: chdir=/home/user/backup git push origin main
       delegate_to: localhost
       environment:
         GIT_SSH_COMMAND: 'ssh -i /path/to/your/ssh/key'
 
     - name: Remove temporary file
       file:
-        path: "/tmp/{{ inventory_hostname }}_backup.txt"
+        path: "/home/user/backup/{{ inventory_hostname }}_backup.txt"
         state: absent
       delegate_to: localhost
 
     # Uncomment below if using HTTPS with a personal access token
     # - name: Push the commit to GitHub (HTTPS)
-    #   command: git push origin main
+    #   command: chdir=/home/user/backup git push origin main
     #   delegate_to: localhost
     #   environment:
     #     GIT_HTTPS_USER: "USERNAME"
