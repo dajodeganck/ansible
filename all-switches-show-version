@@ -1,0 +1,13 @@
+---
+- name: "Ansible 101"
+  hosts: switches
+  gather_facts: no
+  tasks:
+    - name: Show Version
+      cisco.ios.ios_command:
+        commands: show version
+      register: output
+
+    - name: Print output
+      debug:
+        msg: "{{ output.stdout_lines }}"
