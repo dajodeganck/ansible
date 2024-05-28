@@ -13,4 +13,4 @@
 
     - name: Filter and Print Clean Running Config
       debug:
-        msg: "{{ output.stdout_lines | select('match', '^(?!.*!|^$)') | list }}"
+        msg: "{{ output.stdout | regex_replace('(^!.*|^$)', '') | select('match', '^\\S+') | list }}"
