@@ -1,0 +1,16 @@
+---
+- name: "Show Users on Switches"
+  hosts: switches
+  gather_facts: no
+  become: yes
+  vars:
+    ansible_become_pass: Test1231
+  tasks:
+    - name: Show Users
+      cisco.ios.ios_command:
+        commands: show users
+      register: output
+
+    - name: Print Users
+      debug:
+        msg: "{{ output.stdout_lines }}"
