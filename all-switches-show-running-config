@@ -13,4 +13,10 @@
 
     - name: Filter and Print Clean Running Config
       debug:
-        msg: "{{ output.stdout | regex_replace('(^!.*|^$)', '') | select('match', '^\\S+') | list }}"
+        msg: >
+          {{
+            output.stdout_lines
+            | select('search', '^(?!.*!|^$).*')
+            | map('trim')
+            | list
+          }}
