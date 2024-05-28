@@ -67,6 +67,31 @@
         chdir: /tmp/ansible_backup
       ignore_errors: yes
 
+    - name: Check if main branch exists
+      local_action:
+        module: command
+        cmd: git branch --list main
+      args:
+        chdir: /tmp/ansible_backup
+      register: main_branch_check
+      ignore_errors: yes
+
+    - name: Create and switch to main branch if not exists
+      local_action:
+        module: command
+        cmd: git checkout -b main
+      args:
+        chdir: /tmp/ansible_backup
+      when: main_branch_check.stdout == ""
+
+    - name: Switch to main branch if exists
+      local_action:
+        module: command
+        cmd: git checkout main
+      args:
+        chdir: /tmp/ansible_backup
+      when: main_branch_check.stdout != ""
+
     - name: Set up GitHub remote
       local_action:
         module: command
