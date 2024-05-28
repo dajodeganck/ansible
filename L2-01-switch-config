@@ -25,7 +25,7 @@
       cisco.ios.ios_config:
         lines:
           - vlan 10
-          - name Users
+          - name Usersaaaaaa
 
     - name: Configure interface VLAN 1
       cisco.ios.ios_config:
