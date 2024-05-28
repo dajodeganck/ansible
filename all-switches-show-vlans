@@ -1,0 +1,16 @@
+---
+- name: "Show VLANs on Switches"
+  hosts: switches
+  gather_facts: no
+  become: yes
+  vars:
+    ansible_become_pass: Test1231
+  tasks:
+    - name: Show VLANs
+      cisco.ios.ios_command:
+        commands: show vlan
+      register: output
+
+    - name: Print VLANs
+      debug:
+        msg: "{{ output.stdout_lines }}"
