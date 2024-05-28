@@ -1,0 +1,16 @@
+---
+- name: "Show Clean Running Configuration on Switches"
+  hosts: switches
+  gather_facts: no
+  become: yes
+  vars:
+    ansible_become_pass: Test1231
+  tasks:
+    - name: Show Running Config
+      cisco.ios.ios_command:
+        commands: show running-config
+      register: output
+
+    - name: Filter and Print Clean Running Config
+      debug:
+        msg: "{{ output.stdout_lines | select('match', '^(?!.*!|^$)') | list }}"
