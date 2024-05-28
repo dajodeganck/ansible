@@ -3,8 +3,6 @@
   hosts: switches
   gather_facts: no
   serial: 1
-  become: yes
-  become_user: user  # Change to the appropriate user if necessary
   tasks:
     - name: Show Running Config asynchronously
       cisco.ios.ios_command:
@@ -22,48 +20,72 @@
       delay: 15  # Increase the delay between retries
 
     - name: Create temporary file with running config
-      copy:
+      local_action:
+        module: copy
         content: "{{ job_result.results[0].stdout if job_result.results is defined and job_result.results[0].stdout is defined else 'No results found' }}"
-        dest: "/home/user/backup/{{ inventory_hostname }}_backup.txt"
+        dest: "/tmp/{{ inventory_hostname }}_backup.txt"
 
     - name: Ensure the local git repository exists
-      command: git init /home/user/backup
+      local_action:
+        module: command
+        cmd: git init /tmp/ansible_backup
       args:
-        creates: /home/user/backup/.git
-      delegate_to: localhost
+        creates: /tmp/ansible_backup/.git
+
+    - name: Copy temporary file to git repository
+      local_action:
+        module: copy
+        src: "/tmp/{{ inventory_hostname }}_backup.txt"
+        dest: "/tmp/ansible_backup/{{ inventory_hostname }}_backup.txt"
 
     - name: Change working directory to git repository
-      command: chdir=/home/user/backup git add {{ inventory_hostname }}_backup.txt
-      delegate_to: localhost
+      local_action:
+        module: command
+        cmd: git add /tmp/ansible_backup/{{ inventory_hostname }}_backup.txt
 
     - name: Commit the new config file
-      command: chdir=/home/user/backup git commit -m "Add running config for {{ inventory_hostname }}"
-      delegate_to: localhost
+      local_action:
+        module: command
+        cmd: git commit -m "Add running config for {{ inventory_hostname }}"
       ignore_errors: yes
 
     - name: Set up GitHub remote
-      command: chdir=/home/user/backup git remote add origin https://github.com/dajodeganck/ansible.git
-      delegate_to: localhost
+      local_action:
+        module: command
+        cmd: git remote add origin https://github.com/dajodeganck/ansible.git
       args:
-        creates: /home/user/backup/.git/config
+        chdir: /tmp/ansible_backup
+        creates: /tmp/ansible_backup/.git/config
       ignore_errors: yes
 
     - name: Push the commit to GitHub
-      command: chdir=/home/user/backup git push origin main
-      delegate_to: localhost
+      local_action:
+        module: command
+        cmd: git push origin main
+      args:
+        chdir: /tmp/ansible_backup
       environment:
         GIT_SSH_COMMAND: 'ssh -i /path/to/your/ssh/key'
 
-    - name: Remove temporary file
-      file:
-        path: "/home/user/backup/{{ inventory_hostname }}_backup.txt"
+    - name: Remove temporary file from git repository
+      local_action:
+        module: file
+        path: "/tmp/{{ inventory_hostname }}_backup.txt"
         state: absent
-      delegate_to: localhost
+
+    - name: Remove temporary file from system
+      local_action:
+        module: file
+        path: "/tmp/ansible_backup/{{ inventory_hostname }}_backup.txt"
+        state: absent
 
     # Uncomment below if using HTTPS with a personal access token
     # - name: Push the commit to GitHub (HTTPS)
-    #   command: chdir=/home/user/backup git push origin main
-    #   delegate_to: localhost
+    #   local_action:
+    #     module: command
+    #     cmd: git push origin main
+    #   args:
+    #     chdir: /tmp/ansible_backup
     #   environment:
     #     GIT_HTTPS_USER: "USERNAME"
     #     GIT_HTTPS_PASSWORD: "TOKEN"
