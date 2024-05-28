@@ -6,8 +6,19 @@
     - name: Show Running Config
       cisco.ios.ios_command:
         commands: show running-config
+        timeout: 60
       register: output
+      async: 300
+      poll: 0
+
+    - name: Wait for Show Running Config to Complete
+      async_status:
+        jid: "{{ output.ansible_job_id }}"
+      register: job_result
+      until: job_result.finished
+      retries: 30
+      delay: 10
 
     - name: Print Running Config
       debug:
-        msg: "{{ output.stdout_lines }}"
+        msg: "{{ job_result.results.stdout_lines }}"
