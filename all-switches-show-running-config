@@ -3,15 +3,14 @@
   hosts: switches
   gather_facts: no
   tasks:
-    - name: Show Running Config
+    - name: Show Running Config asynchronously
       cisco.ios.ios_command:
         commands: show running-config
-        timeout: 60
       register: output
       async: 300
       poll: 0
 
-    - name: Wait for Show Running Config to Complete
+    - name: Wait for the Show Running Config task to complete
       async_status:
         jid: "{{ output.ansible_job_id }}"
       register: job_result
