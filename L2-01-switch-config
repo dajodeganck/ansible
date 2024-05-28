@@ -142,3 +142,6 @@
           - spanning-tree vlan 30 priority 4096
 
     - name: Save configuration
+      cisco.ios.ios_command:
+        commands:
+          - write memory
