@@ -41,7 +41,7 @@
     - name: Create temporary file with running config
       local_action:
         module: copy
-        content: "{{ job_result.results[0].stdout if job_result.results is defined and job_result.results[0].stdout is defined else 'No results found' }}"
+        content: "{{ job_result.result.stdout if job_result.result is defined and job_result.result.stdout is defined else 'No results found' }}"
         dest: "/tmp/ansible_backup/{{ inventory_hostname }}_backup.txt"
 
     - name: Add new config file to git
@@ -65,7 +65,7 @@
         cmd: git commit --allow-empty -m "Initial commit"
       args:
         chdir: /tmp/ansible_backup
-      when: "not job_result.results[0].stdout"
+      ignore_errors: yes
 
     - name: Set up GitHub remote
       local_action:
