@@ -1,0 +1,13 @@
+---
+- name: "Retrieve Configuration from MikroTik Routers"
+  hosts: mikrotik_routers
+  gather_facts: no
+  tasks:
+    - name: Get MikroTik Configuration
+      ansible.builtin.command:
+        cmd: /export
+      register: output
+
+    - name: Print MikroTik Configuration
+      debug:
+        msg: "{{ output.stdout_lines }}"
