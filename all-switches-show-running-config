@@ -2,6 +2,7 @@
 - name: "Show Running Configuration"
   hosts: switches
   gather_facts: no
+  serial: 1
   tasks:
     - name: Show Running Config asynchronously
       cisco.ios.ios_command:
