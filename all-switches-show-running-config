@@ -19,12 +19,6 @@
       retries: 50  # Increase the number of retries
       delay: 15  # Increase the delay between retries
 
-    - name: Create temporary file with running config
-      local_action:
-        module: copy
-        content: "{{ job_result.results[0].stdout if job_result.results is defined and job_result.results[0].stdout is defined else 'No results found' }}"
-        dest: "/tmp/{{ inventory_hostname }}_backup.txt"
-
     - name: Ensure the local git repository exists
       local_action:
         module: command
@@ -32,21 +26,25 @@
       args:
         creates: /tmp/ansible_backup/.git
 
-    - name: Copy temporary file to git repository
+    - name: Create temporary file with running config
       local_action:
         module: copy
-        src: "/tmp/{{ inventory_hostname }}_backup.txt"
+        content: "{{ job_result.results[0].stdout if job_result.results is defined and job_result.results[0].stdout is defined else 'No results found' }}"
         dest: "/tmp/ansible_backup/{{ inventory_hostname }}_backup.txt"
 
-    - name: Change working directory to git repository
+    - name: Add new config file to git
       local_action:
         module: command
-        cmd: git add /tmp/ansible_backup/{{ inventory_hostname }}_backup.txt
+        cmd: git add {{ inventory_hostname }}_backup.txt
+      args:
+        chdir: /tmp/ansible_backup
 
     - name: Commit the new config file
       local_action:
         module: command
         cmd: git commit -m "Add running config for {{ inventory_hostname }}"
+      args:
+        chdir: /tmp/ansible_backup
       ignore_errors: yes
 
     - name: Set up GitHub remote
@@ -68,12 +66,6 @@
         GIT_SSH_COMMAND: 'ssh -i /path/to/your/ssh/key'
 
     - name: Remove temporary file from git repository
-      local_action:
-        module: file
-        path: "/tmp/{{ inventory_hostname }}_backup.txt"
-        state: absent
-
-    - name: Remove temporary file from system
       local_action:
         module: file
         path: "/tmp/ansible_backup/{{ inventory_hostname }}_backup.txt"
