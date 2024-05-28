@@ -1,5 +1,5 @@
 ---
-- name: "Show Running Configuration"
+- name: "Show Running Configuration and Save to GitHub"
   hosts: switches
   gather_facts: no
   serial: 1
@@ -8,7 +8,7 @@
       cisco.ios.ios_command:
         commands: show running-config
       register: output
-      async: 300
+      async: 600  # Increase the async timeout
       poll: 0
 
     - name: Wait for the Show Running Config task to complete
@@ -16,13 +16,45 @@
         jid: "{{ output.ansible_job_id }}"
       register: job_result
       until: job_result.finished
-      retries: 30
-      delay: 10
+      retries: 50  # Increase the number of retries
+      delay: 15  # Increase the delay between retries
 
-    - name: Debug job_result to understand its structure
-      debug:
-        var: job_result
+    - name: Save Running Config to a local file
+      copy:
+        content: "{{ job_result.results[0].stdout if job_result.results is defined and job_result.results[0].stdout is defined else 'No results found' }}"
+        dest: "/home/user/backup/{{ inventory_hostname }}_backup.txt"
 
-    - name: Print Running Config if results are available
-      debug:
-        msg: "{{ job_result.results[0].stdout_lines if job_result.results is defined and job_result.results[0].stdout_lines is defined else 'No results found' }}"
+    - name: Ensure the local git repository exists
+      command: git init /home/user/backup
+      args:
+        creates: /home/user/backup/.git
+      delegate_to: localhost
+
+    - name: Add new config file to git
+      command: git add /home/user/backup/{{ inventory_hostname }}_backup.txt
+      delegate_to: localhost
+
+    - name: Commit the new config file
+      command: git commit -m "Add running config for {{ inventory_hostname }}"
+      delegate_to: localhost
+      ignore_errors: yes
+
+    - name: Set up GitHub remote
+      command: git remote add origin https://github.com/dajodeganck/ansible.git
+      delegate_to: localhost
+      args:
+        creates: /home/user/backup/.git/config
+
+    - name: Push the commit to GitHub
+      command: git push origin main
+      delegate_to: localhost
+      environment:
+        GIT_SSH_COMMAND: 'ssh -i /path/to/your/ssh/key'
+
+    # Uncomment below if using HTTPS with a personal access token
+    # - name: Push the commit to GitHub (HTTPS)
+    #   command: git push origin main
+    #   delegate_to: localhost
+    #   environment:
+    #     GIT_HTTPS_USER: "USERNAME"
+    #     GIT_HTTPS_PASSWORD: "TOKEN"
