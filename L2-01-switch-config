@@ -14,8 +14,8 @@
           - hostname SW_L2_1
 
     - name: Set banner
-      cisco.ios.ios_config:
-        lines:
+      cisco.ios.ios_command:
+        commands:
           - |
             banner motd #
             Unauthorized access to this device is prohibited!
@@ -25,7 +25,7 @@
       cisco.ios.ios_config:
         lines:
           - vlan 10
-          - name Usersaaaaaa
+          - name Users
 
     - name: Configure interface VLAN 1
       cisco.ios.ios_config:
@@ -39,7 +39,7 @@
       cisco.ios.ios_config:
         lines:
           - interface vlan 10
-          - description Userss
+          - description Users
           - no shutdown
 
     - name: Configure default gateway
@@ -94,30 +94,4 @@
           - switchport access vlan 10
           - switchport trunk encapsulation dot1q
           - switchport mode trunk
-          - switchport trunk allowed vlan 1,10,20,30
-          - no shutdown
-
-    - name: Configure user interfaces
-      cisco.ios.ios_config:
-        lines:
-          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
-          - description Users
-          - switchport access vlan 10
-          - switchport trunk encapsulation dot1q
-          - switchport mode trunk
-          - switchport trunk allowed vlan 1,10,20,30
-          - no shutdown
-
-    - name: Configure Spanning Tree Protocol
-      cisco.ios.ios_config:
-        lines:
-          - spanning-tree mode rapid-pvst
-          - spanning-tree vlan 1 priority 12288
-          - spanning-tree vlan 10 priority 12288
-          - spanning-tree vlan 20 priority 8192
-          - spanning-tree vlan 30 priority 4096
-
-    - name: Save configuration
-      cisco.ios.ios_command:
-        commands:
-          - write memory
+          
