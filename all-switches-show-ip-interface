@@ -3,6 +3,8 @@
   hosts: switches
   gather_facts: no
   become: yes
+  vars:
+    ansible_become_pass: Test1231
   tasks:
     - name: Show IP Interface Brief
       cisco.ios.ios_command:
@@ -10,7 +12,6 @@
       register: output
 
     - name: Append IP interface brief output to backup file
-      become_user: root
       local_action:
         module: lineinfile
         path: "/home/user/backups/ansible/backupfile"
@@ -19,7 +20,6 @@
       delegate_to: localhost
 
     - name: Ensure the local git repository exists
-      become_user: root
       local_action:
         module: command
         cmd: git init /home/user/backups/ansible
@@ -27,21 +27,18 @@
         creates: /home/user/backups/ansible/.git
 
     - name: Configure Git user email
-      become_user: root
       local_action:
         module: command
         cmd: git config --global user.email "dajo.deganck@hotmail.be"
       ignore_errors: yes
 
     - name: Configure Git user name
-      become_user: root
       local_action:
         module: command
         cmd: git config --global user.name "dajodeganck"
       ignore_errors: yes
 
     - name: Add backup file to git
-      become_user: root
       local_action:
         module: command
         cmd: git add backupfile
@@ -49,7 +46,6 @@
         chdir: /home/user/backups/ansible
 
     - name: Commit the backup file
-      become_user: root
       local_action:
         module: command
         cmd: git commit -m "Add backupfile with IP interface brief"
@@ -58,7 +54,6 @@
       ignore_errors: yes
 
     - name: Set GitHub remote URL
-      become_user: root
       local_action:
         module: command
         cmd: git remote set-url origin https://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@github.com/dajodeganck/ansible.git
@@ -67,7 +62,6 @@
       ignore_errors: yes
 
     - name: Push backup file to GitHub
-      become_user: root
       local_action:
         module: command
         cmd: git push origin main
