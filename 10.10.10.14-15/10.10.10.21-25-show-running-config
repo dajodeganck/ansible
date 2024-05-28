@@ -1,6 +1,6 @@
 ---
 - name: "Show Running Configuration"
-  hosts: switches
+  hosts: switches1
   gather_facts: no
   tasks:
     - name: Show Running Config
