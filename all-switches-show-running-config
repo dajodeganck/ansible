@@ -3,6 +3,8 @@
   hosts: switches
   gather_facts: no
   serial: 1
+  become: yes
+  become_user: user  # Change to the appropriate user if necessary
   tasks:
     - name: Show Running Config asynchronously
       cisco.ios.ios_command:
