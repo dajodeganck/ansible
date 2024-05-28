@@ -8,32 +8,13 @@
         commands: show ip interface brief
       register: output
 
-    - name: Ensure the local backup directory exists
-      local_action:
-        module: file
-        path: /home/user/backups/ansible
-        state: directory
-        mode: '0755'
-
-    - name: Create local file with IP interface brief output
-      local_action:
-        module: copy
-        content: "{{ inventory_hostname }}:\n{{ output.stdout }}\n"
-        dest: "/home/user/backups/ansible/backupfile"
-        mode: '0644'
-      delegate_to: localhost
-      run_once: true
-
-    - name: Append output to local backup file
+    - name: Append IP interface brief output to backup file
       local_action:
         module: lineinfile
         path: "/home/user/backups/ansible/backupfile"
         create: yes
-        line: "{{ inventory_hostname }}:\n{{ output.stdout }}\n"
+        line: "{{ inventory_hostname }}:\n{{ output.stdout }}"
       delegate_to: localhost
-      with_items: "{{ groups['switches'] }}"
-      loop_control:
-        loop_var: inventory_hostname
 
     - name: Ensure the local git repository exists
       local_action:
@@ -57,7 +38,7 @@
     - name: Add backup file to git
       local_action:
         module: command
-        cmd: git add /home/user/backups/ansible/backupfile
+        cmd: git add backupfile
       args:
         chdir: /home/user/backups/ansible
 
