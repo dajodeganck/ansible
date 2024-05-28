@@ -73,19 +73,27 @@
           - password cisco
           - login
 
+    - name: Check existing VTY configuration
+      cisco.ios.ios_command:
+        commands:
+          - show running-config | include line vty 0 4
+      register: vty_config_local
+      ignore_errors: yes
+
     - name: Configure VTY lines with login local
       cisco.ios.ios_config:
         lines:
           - line vty 0 4
           - login local
           - transport input ssh
-      register: vty_config_local
+      when: vty_config_local.failed
+      register: vty_config_local_set
       ignore_errors: yes
 
-    - name: Check if VTY lines configuration with login local failed
+    - name: Debug VTY configuration
       debug:
-        msg: "VTY lines configuration with 'login local' failed, trying with 'login'"
-      when: vty_config_local.failed
+        msg: "VTY lines configuration with 'login local' succeeded."
+      when: vty_config_local_set is defined and not vty_config_local_set.failed
 
     - name: Configure VTY lines with login
       cisco.ios.ios_config:
@@ -93,7 +101,7 @@
           - line vty 0 4
           - login
           - transport input ssh
-      when: vty_config_local.failed
+      when: vty_config_local_set.failed
       register: vty_config
 
     - name: Debug VTY configuration
