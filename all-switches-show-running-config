@@ -20,4 +20,4 @@
 
     - name: Print Running Config
       debug:
-        msg: "{{ job_result.results.stdout_lines }}"
+        msg: "{{ job_result.results[0].stdout_lines if job_result.results is defined else 'No results found' }}"
