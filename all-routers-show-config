@@ -4,8 +4,7 @@
   gather_facts: no
   tasks:
     - name: Get MikroTik Configuration
-      ansible.builtin.command:
-        cmd: /export
+      command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {{ ansible_user }}@{{ ansible_host }} /export
       register: output
 
     - name: Print MikroTik Configuration
