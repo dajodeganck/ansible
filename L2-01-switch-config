@@ -89,7 +89,7 @@
     - name: Generate RSA keys
       cisco.ios.ios_command:
         commands:
-          - crypto key generate rsa
+          - crypto key generate rsa modulus 2048
       register: rsa_keygen
       ignore_errors: yes
 
