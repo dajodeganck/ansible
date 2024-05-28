@@ -1,5 +1,5 @@
 ---
-- name: "Show IP Interface Brief on Switches"
+- name: "Show IP Interface Brief and Save to Local and GitHub"
   hosts: switches
   gather_facts: no
   tasks:
@@ -8,6 +8,81 @@
         commands: show ip interface brief
       register: output
 
-    - name: Print IP Interface Brief
-      debug:
-        msg: "{{ output.stdout_lines }}"
+    - name: Ensure the local backup directory exists
+      local_action:
+        module: file
+        path: /home/user/backups/ansible
+        state: directory
+        mode: '0755'
+
+    - name: Create local file with IP interface brief output
+      local_action:
+        module: copy
+        content: "{{ inventory_hostname }}:\n{{ output.stdout }}\n"
+        dest: "/home/user/backups/ansible/backupfile"
+        mode: '0644'
+      delegate_to: localhost
+      run_once: true
+
+    - name: Append output to local backup file
+      local_action:
+        module: lineinfile
+        path: "/home/user/backups/ansible/backupfile"
+        create: yes
+        line: "{{ inventory_hostname }}:\n{{ output.stdout }}\n"
+      delegate_to: localhost
+      with_items: "{{ groups['switches'] }}"
+      loop_control:
+        loop_var: inventory_hostname
+
+    - name: Ensure the local git repository exists
+      local_action:
+        module: command
+        cmd: git init /home/user/backups/ansible
+      args:
+        creates: /home/user/backups/ansible/.git
+
+    - name: Configure Git user email
+      local_action:
+        module: command
+        cmd: git config --global user.email "dajo.deganck@hotmail.be"
+      ignore_errors: yes
+
+    - name: Configure Git user name
+      local_action:
+        module: command
+        cmd: git config --global user.name "dajodeganck"
+      ignore_errors: yes
+
+    - name: Add backup file to git
+      local_action:
+        module: command
+        cmd: git add /home/user/backups/ansible/backupfile
+      args:
+        chdir: /home/user/backups/ansible
+
+    - name: Commit the backup file
+      local_action:
+        module: command
+        cmd: git commit -m "Add backupfile with IP interface brief"
+      args:
+        chdir: /home/user/backups/ansible
+      ignore_errors: yes
+
+    - name: Set GitHub remote URL
+      local_action:
+        module: command
+        cmd: git remote set-url origin https://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@github.com/dajodeganck/ansible.git
+      args:
+        chdir: /home/user/backups/ansible
+      ignore_errors: yes
+
+    - name: Push backup file to GitHub
+      local_action:
+        module: command
+        cmd: git push origin main
+      args:
+        chdir: /home/user/backups/ansible
+      environment:
+        GIT_HTTPS_USER: "dajodeganck"
+        GIT_HTTPS_PASSWORD: "Poes1234567"
