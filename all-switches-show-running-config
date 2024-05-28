@@ -26,6 +26,18 @@
       args:
         creates: /tmp/ansible_backup/.git
 
+    - name: Configure Git user email
+      local_action:
+        module: command
+        cmd: git config --global user.email "your_email@example.com"
+      ignore_errors: yes
+
+    - name: Configure Git user name
+      local_action:
+        module: command
+        cmd: git config --global user.name "Your Name"
+      ignore_errors: yes
+
     - name: Create temporary file with running config
       local_action:
         module: copy
@@ -46,6 +58,14 @@
       args:
         chdir: /tmp/ansible_backup
       ignore_errors: yes
+
+    - name: Ensure initial commit exists
+      local_action:
+        module: command
+        cmd: git commit --allow-empty -m "Initial commit"
+      args:
+        chdir: /tmp/ansible_backup
+      when: "not job_result.results[0].stdout"
 
     - name: Set up GitHub remote
       local_action:
