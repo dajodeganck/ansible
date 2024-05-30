@@ -1,4 +1,3 @@
----
 - name: Backup Cisco Switches
   hosts: switches
   gather_facts: no
@@ -31,13 +30,24 @@
 
     - name: Print configuration file status
       debug:
-        msg: "Configuration file created: {{ saved_file.stat.exists }}" 
+        msg: "Configuration file created: {{ saved_file.stat.exists }}"
+
     - name: Initialize git repository if it does not exist
       git:
         repo: https://github.com/dajodeganck/ansible.git
         dest: "/home/semaphore/ansible"
         clone: yes
         update: no
+
+    - name: Set Git user email
+      command: git config user.email "dajo.degacnk@hotmail.be"
+      args:
+        chdir: "/home/semaphore/ansible"
+
+    - name: Set Git user name
+      command: git config user.name "dajo"
+      args:
+        chdir: "/home/semaphore/ansible"
 
     - name: Add files to staging
       command: git add .
@@ -49,7 +59,6 @@
       args:
         chdir: "/home/semaphore/ansible"
       
-
     - name: Push changes to GitHub
       command: git push origin main
       args:
