@@ -1,4 +1,4 @@
- ---
+---
 - name: Backup Cisco Switches
   hosts: switches
   gather_facts: no
