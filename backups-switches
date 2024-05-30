@@ -1,0 +1,54 @@
+- name: Backup Cisco Switches
+  hosts: switches
+  gather_facts: no
+  tasks:
+    - name: Gather current date and time
+      local_action: command date +"%Y-%m-%d_%H-%M-%S"
+      register: datetime
+      changed_when: false
+
+    - name: Print gathered date and time
+      debug:
+        msg: "Current date and time: {{ datetime.stdout }}"
+
+    - name: Create backup directory if it doesn't exist
+      file:
+        path: "/home/user/backups"
+        state: directory
+        mode: '0755'
+
+    - name: Check if backup directory exists
+      stat:
+        path: "/home/user/backups"
+      register: backup_dir
+
+    - name: Print backup directory status
+      debug:
+        msg: "Backup directory exists: {{ backup_dir.stat.exists }}"
+
+    - name: Gather running configuration from Cisco devices
+      ios_command:
+        commands: show running-config
+      register: running_config
+
+    - name: Print running configuration raw output
+      debug:
+        msg: "Running config raw output: {{ running_config }}"
+
+    - name: Print running configuration stdout
+      debug:
+        msg: "Running config stdout: {{ running_config.stdout[0] | default('No output captured') }}"
+
+    - name: Save running configuration to file
+      copy:
+        content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
+        dest: "/home/user/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+
+    - name: Check if configuration file was created
+      stat:
+        path: "/home/user/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+      register: saved_file
+
+    - name: Print configuration file status
+      debug:
+        msg: "Configuration file created: {{ saved_file.stat.exists }}" 
