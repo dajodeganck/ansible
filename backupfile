@@ -1,7 +1,6 @@
-- name: Backup and synchronize Cisco Switch configurations
+- name: Backup Cisco Switches
   hosts: switches
   gather_facts: no
-
   tasks:
     - name: Gather current date and time
       local_action: command date +"%Y-%m-%d_%H-%M-%S"
@@ -14,7 +13,7 @@
         state: directory
         mode: '0755'
 
-    - name: Ensure secondary backup directory exists
+    - name: Create secondary backup directory if it doesn't exist
       file:
         path: "/home/semaphore/ansible/backups"
         state: directory
@@ -30,15 +29,44 @@
         content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
         dest: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
 
-    - name: Synchronize backup directory to secondary location
-      synchronize:
-        src: /home/semaphore/backups/
-        dest: /home/semaphore/ansible/backups/
-        recursive: yes
-        delete: no  # adjust this according to your needs
-      delegate_to: localhost
+    - name: Save running configuration to secondary backup file (for Ansible repo)
+      copy:
+        content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
+        dest: "/home/semaphore/ansible/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
 
-    - name: Print configuration file status
+    - name: Check if primary configuration file was created
+      stat:
+        path: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+      register: saved_primary_file
+
+    - name: Check if secondary configuration file was created
+      stat:
+        path: "/home/semaphore/ansible/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+      register: saved_secondary_file
+
+    - name: Print primary configuration file status
       debug:
-        msg: "Configuration file for {{ inventory_hostname }} saved and synchronized successfully."
+        msg: "Primary configuration file created: {{ saved_primary_file.stat.exists }}"
 
+    - name: Print secondary configuration file status
+      debug:
+        msg: "Secondary configuration file created: {{ saved_secondary_file.stat.exists }}"
+    - name: Commit and push the changes to GitHub
+      block:
+        - name: Adding updated backup files to Git
+          shell: git add backups/*
+          args:
+            chdir: "/home/semaphore/ansible"  # Ensure this is your local git repository path
+
+        - name: Committing the backup files
+          shell: git commit -m 'Update device configurations'
+          args:
+            chdir: "/home/semaphore/ansible"  # Ensure this is your local git repository path
+          ignore_errors: yes  # This avoids errors if no changes are there to commit
+
+        - name: Pushing changes to GitHub
+          shell: git push origin main
+          args:
+            chdir: "/home/semaphore/ansible"  # Ensure this is your local git repository path
+      delegate_to: localhost
+      run_once: true
