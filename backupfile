@@ -58,7 +58,12 @@
       command: git commit -m "Update playbook with latest changes"
       args:
         chdir: "/home/semaphore/ansible"
-      
+
+    - name: Set new remote URL using personal access token
+      command: git remote set-url origin https://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@github.com/dajodeganck/ansible.git
+      args:
+        chdir: "/home/semaphore/ansible"
+
     - name: Push changes to GitHub
       command: git push origin main
       args:
