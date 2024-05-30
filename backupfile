@@ -13,12 +13,6 @@
         state: directory
         mode: '0755'
 
-    - name: Create secondary backup directory if it doesn't exist
-      file:
-        path: "/home/semaphore/ansible/backups"
-        state: directory
-        mode: '0755'
-
     - name: Gather running configuration from Cisco devices
       ios_command:
         commands: show running-config
