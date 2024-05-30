@@ -1,4 +1,4 @@
----
+ ---
 - name: Backup Cisco Switches
   hosts: switches
   gather_facts: no
@@ -8,56 +8,27 @@
       register: datetime
       changed_when: false
 
-    - name: Print gathered date and time
-      debug:
-        msg: "Current date and time: {{ datetime.stdout }}"
-
     - name: Create backup directory if it doesn't exist
-      become: true  # Use sudo for this task
-      become_method: sudo
       file:
         path: "/home/semaphore/backups"
         state: directory
         mode: '0755'
-
-    - name: Check if backup directory exists
-      become: true  # Use sudo for this task
-      become_method: sudo
-      stat:
-        path: "/home/semaphore/backups"
-      register: backup_dir
-
-    - name: Print backup directory status
-      debug:
-        msg: "Backup directory exists: {{ backup_dir.stat.exists }}"
 
     - name: Gather running configuration from Cisco devices
       ios_command:
         commands: show running-config
       register: running_config
 
-    - name: Print running configuration raw output
-      debug:
-        msg: "Running config raw output: {{ running_config }}"
-
-    - name: Print running configuration stdout
-      debug:
-        msg: "Running config stdout: {{ running_config.stdout[0] | default('No output captured') }}"
-
     - name: Save running configuration to file
-      become: true  # Use sudo for this task
-      become_method: sudo
       copy:
         content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
         dest: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
 
     - name: Check if configuration file was created
-      become: true  # Use sudo for this task
-      become_method: sudo
       stat:
         path: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
       register: saved_file
 
     - name: Print configuration file status
       debug:
-        msg: "Configuration file created: {{ saved_file.stat.exists }}"
+        msg: "Configuration file created: {{ saved_file.stat.exists }}" 
