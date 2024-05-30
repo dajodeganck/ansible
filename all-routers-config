@@ -4,7 +4,7 @@
   gather_facts: no
   tasks:
     - name: Configure MikroTik router
-      ansible.netcommon.routeros_command:
+      community.routeros.command:
         commands:
           - /interface ethernet set [ find default-name=ether1 ] name=WAN
           - /interface bonding add name=bonding1 slaves=ether2,ether3,ether4
