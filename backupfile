@@ -32,3 +32,25 @@
     - name: Print configuration file status
       debug:
         msg: "Configuration file created: {{ saved_file.stat.exists }}" 
+    - name: Initialize git repository if it does not exist
+      git:
+        repo: https://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@github.com/dajodeganck/ansible.git
+        dest: "/home/semaphore/ansible"
+        clone: yes
+        update: no
+
+    - name: Add files to staging
+      command: git add .
+      args:
+        chdir: "/home/semaphore/ansible"
+
+    - name: Commit changes
+      command: git commit -m "Update playbook with latest changes"
+      args:
+        chdir: "/home/semaphore/ansible"
+      ignore_errors: yes  # To avoid errors if nothing has changed
+
+    - name: Push changes to GitHub
+      command: git push origin main
+      args:
+        chdir: "/home/semaphore/ansible"
