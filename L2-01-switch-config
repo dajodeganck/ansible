@@ -3,6 +3,18 @@
   hosts: switches
   gather_facts: no
   tasks:
+    - name: Remove existing MOTD banner
+      cisco.ios.ios_banner:
+        banner: motd
+        state: absent
+
+    - name: Configure the login banner
+      cisco.ios.ios_banner:
+        banner: motd
+        text: |
+          Unauthorized access to this device is prohibited!
+        state: present
+
     - name: Disable IP domain lookup
       cisco.ios.ios_config:
         lines:
@@ -13,18 +25,22 @@
         lines:
           - hostname SW_L2_1
 
-    - name: Configure the login banner
-      cisco.ios.ios_banner:
-        banner: motd
-        text: |
-          Unauthorized access to this device is prohibited!
-        state: present
+    - name: Remove existing VLAN configurations
+      cisco.ios.ios_config:
+        lines:
+          - no vlan 10
+        save_when: modified
 
     - name: Configure VLAN 10
       cisco.ios.ios_config:
         lines:
           - vlan 10
           - name Users
+
+    - name: Default interface VLAN 1
+      cisco.ios.ios_config:
+        lines:
+          - default interface vlan 1
 
     - name: Configure interface VLAN 1
       cisco.ios.ios_config:
@@ -34,6 +50,11 @@
           - ip address 10.10.10.21 255.255.254.0
           - no shutdown
 
+    - name: Default interface VLAN 10
+      cisco.ios.ios_config:
+        lines:
+          - default interface vlan 10
+
     - name: Configure interface VLAN 10
       cisco.ios.ios_config:
         lines:
@@ -41,30 +62,11 @@
           - description Users
           - no shutdown
 
-    - name: Configure default gateway
+    - name: Remove existing console and VTY configurations
       cisco.ios.ios_config:
         lines:
-          - ip default-gateway 10.0.0.1
-
-    - name: Set enable secret
-      cisco.ios.ios_config:
-        lines:
-          - enable secret cisco
-
-    - name: Enable password encryption
-      cisco.ios.ios_config:
-        lines:
-          - service password-encryption
-
-    - name: Set domain name
-      cisco.ios.ios_config:
-        lines:
-          - ip domain-name syntra.be
-
-    - name: Create local user
-      cisco.ios.ios_config:
-        lines:
-          - username dajo secret cisco
+          - no line console 0
+          - no line vty 0 4
 
     - name: Configure console line
       cisco.ios.ios_config:
@@ -79,48 +81,6 @@
           - line vty 0 4
           - transport input ssh
           - login local
-
-    - name: Generate RSA keys
-      cisco.ios.ios_command:
-        commands:
-          - crypto key generate rsa modulus 2048
-      register: rsa_keygen
-      ignore_errors: true
-
-    - name: Debug RSA key generation
-      debug:
-        var: rsa_keygen
-
-    - name: Configure uplink interfaces
-      cisco.ios.ios_config:
-        lines:
-          - interface range e0/0 - 1
-          - description uplink
-          - switchport access vlan 10
-          - switchport trunk encapsulation dot1q
-          - switchport mode trunk
-          - switchport trunk allowed vlan 1,10,20,30
-          - no shutdown
-
-    - name: Configure user interfaces
-      cisco.ios.ios_config:
-        lines:
-          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
-          - description Users
-          - switchport access vlan 10
-          - switchport trunk encapsulation dot1q
-          - switchport mode trunk
-          - switchport trunk allowed vlan 1,10,20,30
-          - no shutdown
-
-    - name: Configure Spanning Tree Protocol
-      cisco.ios.ios_config:
-        lines:
-          - spanning-tree mode rapid-pvst
-          - spanning-tree vlan 1 priority 12288
-          - spanning-tree vlan 10 priority 12288
-          - spanning-tree vlan 20 priority 8192
-          - spanning-tree vlan 30 priority 4096
 
     - name: Save configuration
       cisco.ios.ios_command:
