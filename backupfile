@@ -43,7 +43,7 @@
     - name: Add files to staging
       command: git add .
       args:
-        chdir: "/home/semaphore/ansible"
+        chdir: "/home/semaphore/ansible/backups"
 
     - name: Check for uncommitted changes
       command: git status --porcelain
