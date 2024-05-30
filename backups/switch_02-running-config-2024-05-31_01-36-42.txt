@@ -1,0 +1,233 @@
+Building configuration...
+
+Current configuration : 4287 bytes
+!
+! Last configuration change at 22:14:27 UTC Thu May 30 2024
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service compress-config
+!
+hostname SW_L3_2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 5 $1$gnmE$cIfKhuYZzEY9nnV9/CmjA/
+!
+username dajo secret 5 $1$Sdbj$.MYWx38wYgeUEsz1f9DRk0
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
+!
+no ip domain-lookup
+ip domain-name syntra.be
+ip cef
+no ipv6 cef
+!
+!
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+spanning-tree vlan 1,10 priority 12288
+spanning-tree vlan 20 priority 8192
+spanning-tree vlan 30,44 priority 4096
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Port-channel1
+ description Connected to other L3 (EtherChannel)
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface Port-channel2
+ description Connected to MikroTik bonding1 (EtherChannel)
+ switchport trunk allowed vlan 1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface Ethernet0/0
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet0/1
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet0/2
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet0/3
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet1/0
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet1/1
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet1/2
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet1/3
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet2/0
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet2/1
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet2/2
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet2/3
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet3/0
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet3/1
+ description used switch ports
+ switchport access vlan 10
+!
+interface Ethernet3/2
+ description Management
+ switchport access vlan 44
+ switchport trunk allowed vlan 1,10,20,30,44
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface Ethernet3/3
+ description Management
+ switchport access vlan 44
+ switchport trunk allowed vlan 1,10,20,30,44
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface Ethernet4/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ channel-group 1 mode active
+!
+interface Ethernet4/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ channel-group 1 mode active
+!
+interface Ethernet4/2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ channel-group 1 mode active
+!
+interface Ethernet4/3
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ channel-group 1 mode active
+!
+interface Ethernet5/0
+ description reserve
+ shutdown
+!
+interface Ethernet5/1
+ description Uplink
+ switchport trunk allowed vlan 1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ channel-group 2 mode on
+!
+interface Ethernet5/2
+ description Uplink
+ switchport trunk allowed vlan 1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ channel-group 2 mode on
+!
+interface Ethernet5/3
+ description Uplink
+ switchport trunk allowed vlan 1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ channel-group 2 mode on
+!
+interface Vlan1
+ description IP address
+ ip address 10.10.10.15 255.255.254.0
+ no ip route-cache
+!
+interface Vlan10
+ description All users
+ no ip address
+!
+interface Vlan20
+ description Uplink
+ no ip address
+!
+interface Vlan30
+ description Link_to_other_SW
+ no ip address
+!
+interface Vlan44
+ description Management
+ no ip address
+!
+ip default-gateway 10.0.0.1
+ip forward-protocol nd
+!
+ip http server
+ip http secure-server
+!
+ip ssh server algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+ip ssh client algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+!
+!
+!
+!
+!
+control-plane
+!
+banner motd ^CUnauthorized access to this device is prohibited!^C
+!
+line con 0
+ password 7 01100F175804
+ logging synchronous
+ login
+line aux 0
+line vty 0 4
+ login local
+ transport input ssh
+!
+!
+!
+end
