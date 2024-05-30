@@ -1,3 +1,4 @@
+---
 - name: Backup Cisco Switches
   hosts: switches
   gather_facts: no
@@ -12,12 +13,16 @@
         msg: "Current date and time: {{ datetime.stdout }}"
 
     - name: Create backup directory if it doesn't exist
+      become: true  # Use sudo for this task
+      become_method: sudo
       file:
         path: "/home/user/backups"
         state: directory
         mode: '0755'
 
     - name: Check if backup directory exists
+      become: true  # Use sudo for this task
+      become_method: sudo
       stat:
         path: "/home/user/backups"
       register: backup_dir
@@ -40,15 +45,19 @@
         msg: "Running config stdout: {{ running_config.stdout[0] | default('No output captured') }}"
 
     - name: Save running configuration to file
+      become: true  # Use sudo for this task
+      become_method: sudo
       copy:
         content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
         dest: "/home/user/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
 
     - name: Check if configuration file was created
+      become: true  # Use sudo for this task
+      become_method: sudo
       stat:
         path: "/home/user/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
       register: saved_file
 
     - name: Print configuration file status
       debug:
-        msg: "Configuration file created: {{ saved_file.stat.exists }}" 
+        msg: "Configuration file created: {{ saved_file.stat.exists }}"
