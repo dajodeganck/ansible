@@ -78,26 +78,7 @@
           - line vty 0 4
           - login local
           - transport input ssh
-      register: vty_config_local_set
-      ignore_errors: true
-
-    - name: Debug VTY configuration with login local
-      debug:
-        msg: "VTY lines configuration with 'login local' succeeded."
-      when: vty_config_local_set is defined and not vty_config_local_set.failed
-
-    - name: Configure VTY lines with login
-      cisco.ios.ios_config:
-        lines:
-          - line vty 0 4
-          - login
-          - transport input ssh
-      when: vty_config_local_set.failed
-      register: vty_config
-
-    - name: Debug VTY configuration with login
-      debug:
-        var: vty_config
+     
 
     - name: Generate RSA keys
       cisco.ios.ios_command:
