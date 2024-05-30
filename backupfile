@@ -22,7 +22,7 @@
     - name: Save running configuration to file
       copy:
         content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
-        dest: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+        dest: "/home/semaphore/ansible/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
 
     - name: Check if configuration file was created
       stat:
