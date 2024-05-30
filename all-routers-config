@@ -1,10 +1,18 @@
 ---
-- name: "Configure MikroTik Routers with Different IP Addresses for Bonding Interface"
+- name: "Configure and Handle License Prompt on MikroTik Routers"
   hosts: mikrotik_routers
   gather_facts: no
 
   tasks:
-    - name: Apply configuration commands to MikroTik Router
+    - name: Check and Accept MikroTik License
+      expect:
+        command: ssh admin@{{ ansible_host }}
+        responses:
+          "Do you accept the license terms? (yes/no):": "yes"
+        timeout: 30  # Set an appropriate timeout value
+      ignore_errors: true  # Optionally ignore errors to continue with further commands
+
+    - name: Additional Configuration Commands
       community.routeros.command:
         commands:
           - /interface ethernet set [ find default-name=ether1 ] name=WAN
