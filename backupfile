@@ -23,15 +23,6 @@
         content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
         dest: "/home/semaphore/ansible/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
 
-    - name: Ensure proper permissions for Git operations
-      file:
-        path: "/home/semaphore/ansible/.git"
-        state: directory
-        recurse: true
-        owner: semaphore
-        group: semaphore
-        mode: '0775'
-
     - name: Initialize git repository if it does not exist
       git:
         repo: https://github.com/dajodeganck/ansible.git
