@@ -21,6 +21,8 @@
         mode: '0775'
         owner: semaphore
         group: semaphore
+      become: true
+      become_user: root
 
     - name: Set proper ownership for the entire Ansible directory
       file:
@@ -30,6 +32,7 @@
         group: semaphore
         recurse: true
       become: true
+      become_user: root
 
     - name: Configure Git to recognize the Ansible directory as safe
       command: git config --global --add safe.directory /home/semaphore/ansible
@@ -51,11 +54,11 @@
         src: /home/semaphore/backups/
         dest: /home/semaphore/ansible/backups/
         recursive: yes
-        delete: no  # adjust this according to your needs
+        delete: no
       delegate_to: localhost
 
     - name: Adding updated backup files to Git
-      shell: git add backups/*
+      shell: git add .
       args:
         chdir: "/home/semaphore/ansible"
       become: true
