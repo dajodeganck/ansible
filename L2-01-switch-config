@@ -72,12 +72,14 @@
           - password cisco
           - login
 
-    - name: Configure VTY lines with login local
+    - name: Configure transport and login settings for VTY lines
       cisco.ios.ios_config:
         lines:
-          - line vty 0 4
           - transport input ssh
           - login local
+        parents: line vty 0 4
+        save_when: modified
+
      
 
     - name: Generate RSA keys
