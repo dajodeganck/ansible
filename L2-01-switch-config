@@ -25,11 +25,15 @@
           - no banner motd
       ignore_errors: yes
 
-    - name: Set banner motd
-      ios_config:
-        lines:
-          - banner motd #Unauthorized access to this device is prohibited!#
-      ignore_errors: yes
+    - name: Configure the login banner
+      cisco.ios.ios_banner:
+        banner: login
+        text: |
+          this is my login banner
+          that contains a multiline
+          string
+        state: present
+
     - name: Create VLAN 10
       ios_config:
         lines:
@@ -108,7 +112,13 @@
         lines:
           - line vty 0 4
           - transport input ssh
+
+    - name: Enable local login on VTY lines
+      ios_config:
+        lines:
+          - line vty 0 4
           - login local
+
     - name: Generate RSA key
       ios_command:
         commands:
