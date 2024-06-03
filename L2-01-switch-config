@@ -23,6 +23,7 @@
       ios_config:
         lines:
           - no banner motd
+      ignore_errors: yes
 
     - name: Set banner motd
       ios_config:
