@@ -1,6 +1,6 @@
 ---
 - name: Configure Cisco switches
-  hosts: switches
+  hosts: all
   gather_facts: no
   tasks:
     - name: Ensure the switch is in enable mode
@@ -135,21 +135,26 @@
           - switchport access vlan 10
           - no shutdown
 
-    - name: Configure EtherChannel 1
+    - name: Create EtherChannel 1
       ios_config:
         lines:
           - interface range e4/0 - 3
           - channel-group 1 mode active
           - no shutdown
 
-    - name: Configure Port-channel 1
+    - name: Create Port-channel 1
+      ios_config:
+        lines:
+          - interface Port-channel1
+          - switchport trunk encapsulation dot1q
+          - switchport mode trunk
+          - no shutdown
+
+    - name: Configure Port-channel 1 description
       ios_config:
         lines:
           - interface Port-channel1
           - description Connected to other L3 (EtherChannel)
-          - switchport trunk encapsulation dot1q
-          - switchport mode trunk
-          - no shutdown
 
     - name: Configure EtherChannel 2
       ios_config:
@@ -162,15 +167,20 @@
           - channel-group 2 mode on
           - no shutdown
 
-    - name: Configure Port-channel 2
+    - name: Create Port-channel 2
       ios_config:
         lines:
           - interface Port-channel2
-          - description Connected to MikroTik bonding1 (EtherChannel)
           - switchport trunk encapsulation dot1q
           - switchport trunk allowed vlan 1
           - switchport mode trunk
           - no shutdown
+
+    - name: Configure Port-channel 2 description
+      ios_config:
+        lines:
+          - interface Port-channel2
+          - description Connected to MikroTik bonding1 (EtherChannel)
 
     - name: Configure management interfaces
       ios_config:
