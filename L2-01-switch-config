@@ -113,19 +113,14 @@
         lines:
           - line vty 0 4
           - transport input ssh
-      ignore_errors: yes
-
-    - name: Enable local login on VTY lines
-      ios_config:
-        lines:
-          - line vty 0 4
           - login local
       ignore_errors: yes
 
     - name: Generate RSA key
       ios_command:
-        commands:
-          - crypto key generate rsa modulus 2048
+        lines:
+          - crypto key generate rsa
+          - 2048
       ignore_errors: yes
 
     - name: Configure uplink interfaces description
@@ -223,10 +218,4 @@
     - name: Set spanning-tree priority for VLAN 30
       ios_config:
         lines:
-          - spanning-tree vlan 30 priority 4096
-
-    - name: Save configuration
-      ios_command:
-        commands:
-          - end
-          - write memory
+         
