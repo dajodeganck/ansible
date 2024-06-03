@@ -29,7 +29,7 @@
       ios_config:
         lines:
           - banner motd #Unauthorized access to this device is prohibited!#
-
+      ignore_errors: yes
     - name: Create VLAN 10
       ios_config:
         lines:
