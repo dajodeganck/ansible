@@ -25,7 +25,7 @@
 
     - name: Initialize git repository if it does not exist
       git:
-        repo: git@github.com:dajodeganck/ansible.git
+        repo: https://github.com/dajodeganck/ansible.git
         dest: "/home/semaphore/ansible"
         clone: yes
         update: no
@@ -54,7 +54,7 @@
       when: git_status.stdout != ""
 
     - name: Set new remote URL using personal access token
-      command: git remote set-url origin git@github.com:dajodeganck/ansible.git
+      command: git remote set-url origin https://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@github.com/dajodeganck/ansible.git
       args:
         chdir: "/home/semaphore/ansible"
       when: git_status.stdout != ""
