@@ -1,124 +1,42 @@
 ---
-- name: Configure Cisco switch
+- name: Backup Cisco Switches
   hosts: switches
   gather_facts: no
   tasks:
-    - name: Ensure the switch is in enable mode
+    - name: Gather current date and time
+      local_action: command date +"%Y-%m-%d_%H-%M-%S"
+      register: datetime
+      changed_when: false
+
+    - name: Create backup directory if it doesn't exist
+      file:
+        path: "/home/semaphore/ansible/backups"
+        state: directory
+        mode: '0755'
+
+    - name: Gather running configuration from Cisco devices
       ios_command:
-        commands:
-          - enable
-          - configure terminal
+        commands: show running-config
+      register: running_config
 
-    - name: Disable IP domain lookup
-      ios_config:
-        lines:
-          - no ip domain-lookup
+    - name: Save running configuration to file
+      copy:
+        content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
+        dest: "/home/semaphore/ansible/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
 
-    - name: Set hostname
-      ios_config:
-        lines:
-          - hostname SW_L2_1
+    - name: Initialize git repository if it does not exist
+      git:
+        repo: https://github.com/dajodeganck/ansible.git
+        dest: "/home/semaphore/ansible"
+        clone: yes
+        update: no
 
-    - name: Set banner motd
-      ios_config:
-        lines:
-          - banner motd #Unauthorized access to this device is prohibited!#
+    - name: Set Git user email
+      command: git config user.email "dajo.degacnk@hotmail.be"
+      args:
+        chdir: "/home/semaphore/ansible"
 
-    - name: Create VLAN 10
-      ios_config:
-        lines:
-          - vlan 10
-          - name Users
-
-    - name: Configure interface VLAN 1 description
-      ios_config:
-        lines:
-          - interface vlan 1
-          - description IP address
-
-    - name: Configure interface VLAN 1 IP address
-      ios_config:
-        lines:
-          - interface vlan 1
-          - ip address 10.10.10.21 255.255.254.0
-
-    - name: Enable interface VLAN 1
-      ios_config:
-        lines:
-          - interface vlan 1
-          - no shutdown
-
-    - name: Configure interface VLAN 10 description
-      ios_config:
-        lines:
-          - interface vlan 10
-          - description Users
-
-    - name: Enable interface VLAN 10
-      ios_config:
-        lines:
-          - interface vlan 10
-          - no shutdown
-
-    - name: Set default gateway
-      ios_config:
-        lines:
-          - ip default-gateway 10.0.0.1
-
-    - name: Set enable secret
-      ios_config:
-        lines:
-          - enable secret cisco
-
-    - name: Enable service password encryption
-      ios_config:
-        lines:
-          - service password-encryption
-
-    - name: Set IP domain name
-      ios_config:
-        lines:
-          - ip domain-name syntra.be
-
-    - name: Create user with secret
-      ios_config:
-        lines:
-          - username dajo secret cisco
-
-    - name: Configure console line password
-      ios_config:
-        lines:
-          - line console 0
-          - password cisco
-
-    - name: Enable login on console line
-      ios_config:
-        lines:
-          - line console 0
-          - login
-
-    - name: Configure VTY lines for SSH transport
-      ios_config:
-        lines:
-          - line vty 0 4
-          - transport input ssh
-
-    - name: Enable local login on VTY lines
-      ios_config:
-        lines:
-          - line vty 0 4
-          - login local
-
-    - name: Generate RSA key
-      ios_command:
-        commands:
-          - crypto key generate rsa
-          - 2048
-
-    - name: Configure uplink interfaces description
-      ios_config:
-        lines:
-          - interface range e0/0 - 1
-          - description uplink
-
-    - name: Set upl
+    - name: Set Git user name
+      command: git config user.name "dajodeganck"
+      args:
+        chdir: "/home/semaphore/ansible"
