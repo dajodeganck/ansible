@@ -118,9 +118,9 @@
 
     - name: Generate RSA key
       ios_command:
-        lines:
-          - crypto key generate rsa
-          - 2048
+        commands:
+          - crypto key generate rsa modulus 2048
+        
       ignore_errors: yes
 
     - name: Configure uplink interfaces description
