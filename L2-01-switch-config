@@ -19,6 +19,11 @@
         lines:
           - hostname SW_L2_1
 
+    - name: Remove existing banner motd
+      ios_config:
+        lines:
+          - no banner motd
+
     - name: Set banner motd
       ios_config:
         lines:
