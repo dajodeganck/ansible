@@ -1,88 +1,112 @@
 ---
-- name: Apply basic configuration to Cisco switch
+- name: Configure Cisco switch
   hosts: switches
   gather_facts: no
   tasks:
-    - name: Remove existing MOTD banner
-      cisco.ios.ios_banner:
-        banner: motd
-        state: absent
+    - name: Ensure the switch is in enable mode
+      ios_command:
+        commands:
+          - enable
+          - configure terminal
 
-    - name: Configure the login banner
-      cisco.ios.ios_banner:
-        banner: motd
-        text: |
-          Unauthorized access to this device is prohibited!
-        state: present
-
-    - name: Disable IP domain lookup
-      cisco.ios.ios_config:
+    - name: Set basic configurations
+      ios_config:
         lines:
           - no ip domain-lookup
-
-    - name: Set hostname
-      cisco.ios.ios_config:
-        lines:
           - hostname SW_L2_1
-
-    - name: Remove existing VLAN configurations
-      cisco.ios.ios_config:
-        lines:
-          - no vlan 10
-        save_when: modified
-
+          - banner motd #Unauthorized access to this device is prohibited!#
+    
     - name: Configure VLAN 10
-      cisco.ios.ios_config:
+      ios_config:
         lines:
           - vlan 10
           - name Users
 
-    - name: Default interface VLAN 1
-      cisco.ios.ios_config:
-        lines:
-          - default interface vlan 1
-
-    - name: Configure interface VLAN 1
-      cisco.ios.ios_config:
+    - name: Configure VLAN 1 interface
+      ios_config:
         lines:
           - interface vlan 1
-          - description "Default VLAN"
+          - description IP address
           - ip address 10.10.10.21 255.255.254.0
           - no shutdown
 
-    - name: Default interface VLAN 10
-      cisco.ios.ios_config:
-        lines:
-          - default interface vlan 10
-
-    - name: Configure interface VLAN 10
-      cisco.ios.ios_config:
+    - name: Configure VLAN 10 interface
+      ios_config:
         lines:
           - interface vlan 10
           - description Users
           - no shutdown
 
-    - name: Remove existing console and VTY configurations
-      cisco.ios.ios_config:
+    - name: Set default gateway
+      ios_config:
         lines:
-          - no line console 0
-          - no line vty 0 4
+          - ip default-gateway 10.0.0.1
+
+    - name: Set enable secret
+      ios_config:
+        lines:
+          - enable secret cisco
+          - service password-encryption
+
+    - name: Set domain name and username
+      ios_config:
+        lines:
+          - ip domain-name syntra.be
+          - username dajo secret cisco
 
     - name: Configure console line
-      cisco.ios.ios_config:
+      ios_config:
         lines:
           - line console 0
           - password cisco
           - login
 
-    - name: Configure transport and login settings for VTY lines
-      cisco.ios.ios_config:
+    - name: Configure VTY lines for SSH
+      ios_config:
         lines:
           - line vty 0 4
           - transport input ssh
           - login local
 
-    - name: Save configuration
-      cisco.ios.ios_command:
+    - name: Generate RSA key
+      ios_command:
         commands:
+          - crypto key generate rsa
+          - 2048
+
+    - name: Configure uplink interfaces
+      ios_config:
+        lines:
+          - interface range e0/0 - 1
+          - description uplink
+          - switchport access vlan 10
+          - switchport trunk encapsulation dot1q
+          - switchport mode trunk
+          - switchport trunk allowed vlan 1,10,20,30
+          - no shutdown
+
+    - name: Configure user interfaces
+      ios_config:
+        lines:
+          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
+          - description Users
+          - switchport access vlan 10
+          - switchport trunk encapsulation dot1q
+          - switchport mode trunk
+          - switchport trunk allowed vlan 1,10,20,30
+          - no shutdown
+
+    - name: Configure spanning-tree
+      ios_config:
+        lines:
+          - spanning-tree mode rapid-pvst
+          - spanning-tree vlan 1 priority 12288
+          - spanning-tree vlan 10 priority 12288
+          - spanning-tree vlan 20 priority 8192
+          - spanning-tree vlan 30 priority 4096
+
+    - name: Save configuration
+      ios_command:
+        commands:
+          - end
           - write memory
