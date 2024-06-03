@@ -45,12 +45,7 @@
       args:
         chdir: "/home/semaphore/ansible"
 
-    - name: Check for uncommitted changes
-      command: git status --porcelain
-      args:
-        chdir: "/home/semaphore/ansible"
-      register: git_status
-      changed_when: false
+   
 
     - name: Commit changes if there are changes
       command: git commit -m "Update playbook with latest changes"
@@ -59,7 +54,7 @@
       when: git_status.stdout != ""
 
     - name: Set new remote URL using personal access token
-      command: git remote set-url origin https://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@github.com/dajodeganck/ansible.git
+      command: git remote set-url origin git@github.com:dajodeganck/ansible.git
       args:
         chdir: "/home/semaphore/ansible"
       when: git_status.stdout != ""
