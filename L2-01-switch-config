@@ -9,32 +9,55 @@
           - enable
           - configure terminal
 
-    - name: Set basic configurations
+    - name: Disable IP domain lookup
       ios_config:
         lines:
           - no ip domain-lookup
+
+    - name: Set hostname
+      ios_config:
+        lines:
           - hostname SW_L2_1
+
+    - name: Set banner motd
+      ios_config:
+        lines:
           - banner motd #Unauthorized access to this device is prohibited!#
-    
-    - name: Configure VLAN 10
+
+    - name: Create VLAN 10
       ios_config:
         lines:
           - vlan 10
           - name Users
 
-    - name: Configure VLAN 1 interface
+    - name: Configure interface VLAN 1 description
       ios_config:
         lines:
           - interface vlan 1
           - description IP address
+
+    - name: Configure interface VLAN 1 IP address
+      ios_config:
+        lines:
+          - interface vlan 1
           - ip address 10.10.10.21 255.255.254.0
+
+    - name: Enable interface VLAN 1
+      ios_config:
+        lines:
+          - interface vlan 1
           - no shutdown
 
-    - name: Configure VLAN 10 interface
+    - name: Configure interface VLAN 10 description
       ios_config:
         lines:
           - interface vlan 10
           - description Users
+
+    - name: Enable interface VLAN 10
+      ios_config:
+        lines:
+          - interface vlan 10
           - no shutdown
 
     - name: Set default gateway
@@ -46,26 +69,44 @@
       ios_config:
         lines:
           - enable secret cisco
+
+    - name: Enable service password encryption
+      ios_config:
+        lines:
           - service password-encryption
 
-    - name: Set domain name and username
+    - name: Set IP domain name
       ios_config:
         lines:
           - ip domain-name syntra.be
+
+    - name: Create user with secret
+      ios_config:
+        lines:
           - username dajo secret cisco
 
-    - name: Configure console line
+    - name: Configure console line password
       ios_config:
         lines:
           - line console 0
           - password cisco
+
+    - name: Enable login on console line
+      ios_config:
+        lines:
+          - line console 0
           - login
 
-    - name: Configure VTY lines for SSH
+    - name: Configure VTY lines for SSH transport
       ios_config:
         lines:
           - line vty 0 4
           - transport input ssh
+
+    - name: Enable local login on VTY lines
+      ios_config:
+        lines:
+          - line vty 0 4
           - login local
 
     - name: Generate RSA key
@@ -74,35 +115,101 @@
           - crypto key generate rsa
           - 2048
 
-    - name: Configure uplink interfaces
+    - name: Configure uplink interfaces description
       ios_config:
         lines:
           - interface range e0/0 - 1
           - description uplink
+
+    - name: Set uplink interfaces access VLAN
+      ios_config:
+        lines:
+          - interface range e0/0 - 1
           - switchport access vlan 10
+
+    - name: Set uplink interfaces trunk encapsulation
+      ios_config:
+        lines:
+          - interface range e0/0 - 1
           - switchport trunk encapsulation dot1q
+
+    - name: Set uplink interfaces to trunk mode
+      ios_config:
+        lines:
+          - interface range e0/0 - 1
           - switchport mode trunk
+
+    - name: Allow VLANs on uplink interfaces
+      ios_config:
+        lines:
+          - interface range e0/0 - 1
           - switchport trunk allowed vlan 1,10,20,30
+
+    - name: Enable uplink interfaces
+      ios_config:
+        lines:
+          - interface range e0/0 - 1
           - no shutdown
 
-    - name: Configure user interfaces
+    - name: Configure user interfaces description
       ios_config:
         lines:
           - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
           - description Users
+
+    - name: Set user interfaces access VLAN
+      ios_config:
+        lines:
+          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
           - switchport access vlan 10
+
+    - name: Set user interfaces trunk encapsulation
+      ios_config:
+        lines:
+          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
           - switchport trunk encapsulation dot1q
+
+    - name: Set user interfaces to trunk mode
+      ios_config:
+        lines:
+          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
           - switchport mode trunk
+
+    - name: Allow VLANs on user interfaces
+      ios_config:
+        lines:
+          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
           - switchport trunk allowed vlan 1,10,20,30
+
+    - name: Enable user interfaces
+      ios_config:
+        lines:
+          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
           - no shutdown
 
-    - name: Configure spanning-tree
+    - name: Set spanning-tree mode to rapid-pvst
       ios_config:
         lines:
           - spanning-tree mode rapid-pvst
+
+    - name: Set spanning-tree priority for VLAN 1
+      ios_config:
+        lines:
           - spanning-tree vlan 1 priority 12288
+
+    - name: Set spanning-tree priority for VLAN 10
+      ios_config:
+        lines:
           - spanning-tree vlan 10 priority 12288
+
+    - name: Set spanning-tree priority for VLAN 20
+      ios_config:
+        lines:
           - spanning-tree vlan 20 priority 8192
+
+    - name: Set spanning-tree priority for VLAN 30
+      ios_config:
+        lines:
           - spanning-tree vlan 30 priority 4096
 
     - name: Save configuration
