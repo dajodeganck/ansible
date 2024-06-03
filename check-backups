@@ -1,0 +1,66 @@
+- name: Backup Cisco Switches
+  hosts: switches
+  gather_facts: no
+  tasks:
+    - name: Gather current date and time
+      local_action: command date +"%Y-%m-%d_%H-%M-%S"
+      register: datetime
+      changed_when: false
+
+    - name: Create backup directory if it doesn't exist
+      file:
+        path: "/home/semaphore/ansible/backups"
+        state: directory
+        mode: '0755'
+
+    - name: Gather running configuration from Cisco devices
+      ios_command:
+        commands: show running-config
+      register: running_config
+
+    - name: Save running configuration to file
+      copy:
+        content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
+        dest: "/home/semaphore/ansible/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+
+    - name: Initialize git repository if it does not exist
+      git:
+        repo: https://github.com/dajodeganck/ansible.git
+        dest: "/home/semaphore/ansible"
+        clone: yes
+        update: no
+
+    - name: Set Git user email
+      command: git config user.email "dajo.degacnk@hotmail.be"
+      args:
+        chdir: "/home/semaphore/ansible"
+
+    - name: Set Git user name
+      command: git config user.name "dajodeganck"
+      args:
+        chdir: "/home/semaphore/ansible"
+
+    - name: Add files to staging
+      command: git add .
+      args:
+        chdir: "/home/semaphore/ansible"
+
+   
+
+    - name: Commit changes if there are changes
+      command: git commit -m "Update playbook with latest changes"
+      args:
+        chdir: "/home/semaphore/ansible"
+      when: git_status.stdout != ""
+
+    - name: Set new remote URL using personal access token
+      command: git remote set-url origin https://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@github.com/dajodeganck/ansible.git
+      args:
+        chdir: "/home/semaphore/ansible"
+      when: git_status.stdout != ""
+
+    - name: Push changes to GitHub
+      command: git push origin main
+      args:
+        chdir: "/home/semaphore/ansible"
+      when: git_status.stdout != ""
