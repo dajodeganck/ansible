@@ -112,12 +112,14 @@
         lines:
           - line vty 0 4
           - transport input ssh
+      ignore_errors: yes
 
     - name: Enable local login on VTY lines
       ios_config:
         lines:
           - line vty 0 4
           - login local
+      ignore_errors: yes
 
     - name: Generate RSA key
       ios_command:
