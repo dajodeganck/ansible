@@ -36,7 +36,7 @@
         chdir: "/home/semaphore/ansible"
 
     - name: Set Git user name
-      command: git config user.name "dajo"
+      command: git config user.name "dajodeganck"
       args:
         chdir: "/home/semaphore/ansible"
 
@@ -59,7 +59,7 @@
       when: git_status.stdout != ""
 
     - name: Set new remote URL using personal access token
-      command: git remote set-url origin https://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@github.com/dajodeganck/ansible.git
+      command: git remote set-url origin https://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@github.com/dajodeganck/ansible.git
       args:
         chdir: "/home/semaphore/ansible"
       when: git_status.stdout != ""

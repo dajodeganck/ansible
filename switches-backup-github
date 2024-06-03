@@ -39,38 +39,3 @@
       command: git config user.name "dajodeganck"
       args:
         chdir: "/home/semaphore/ansible"
-
-    - name: Add files to staging
-      command: git add .
-      args:
-        chdir: "/home/semaphore/ansible"
-
-    - name: Check for uncommitted changes
-      command: git status --porcelain
-      args:
-        chdir: "/home/semaphore/ansible"
-      register: git_status
-      changed_when: false
-
-    - name: Commit changes if there are changes
-      command: git commit -m "Update playbook with latest changes"
-      args:
-        chdir: "/home/semaphore/ansible"
-      when: git_status.stdout != ""
-
-    - name: Set new remote URL using personal access token
-      command: git remote set-url origin https://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@github.com/dajodeganck/ansible.git
-      args:
-        chdir: "/home/semaphore/ansible"
-      when: git_status.stdout != ""
-
-    - name: Pull latest changes from GitHub
-      command: git pull --rebase
-      args:
-        chdir: "/home/semaphore/ansible"
-
-    - name: Push changes to GitHub
-      command: git push origin main
-      args:
-        chdir: "/home/semaphore/ansible"
-      when: git_status.stdout != ""
