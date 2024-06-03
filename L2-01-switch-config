@@ -107,9 +107,8 @@
       ios_config:
         lines:
           - line vty 0 4
-          - login local
           - transport input ssh
-
+          - login local
     - name: Generate RSA key
       ios_command:
         commands:
