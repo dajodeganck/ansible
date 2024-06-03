@@ -8,165 +8,117 @@
         commands:
           - enable
           - configure terminal
-      ignore_errors: yes
-      register: result
-    - debug:
-        var: result
 
-    - name: Set basic configurations
+    - name: Disable IP domain lookup
       ios_config:
         lines:
           - no ip domain-lookup
-          - hostname SW_L2_1
-          - banner motd #Unauthorized access to this device is prohibited!#
-      ignore_errors: yes
-      register: basic_config_result
-    - debug:
-        var: basic_config_result
 
-    - name: Configure VLAN 10
+    - name: Set hostname
+      ios_config:
+        lines:
+          - hostname SW_L2_1
+
+    - name: Set banner motd
+      ios_config:
+        lines:
+          - banner motd #Unauthorized access to this device is prohibited!#
+
+    - name: Create VLAN 10
       ios_config:
         lines:
           - vlan 10
           - name Users
-      ignore_errors: yes
-      register: vlan10_result
-    - debug:
-        var: vlan10_result
 
-    - name: Configure VLAN 1 interface
+    - name: Configure interface VLAN 1 description
       ios_config:
         lines:
           - interface vlan 1
           - description IP address
-          - ip address 10.10.10.21 255.255.254.0
-          - no shutdown
-      ignore_errors: yes
-      register: vlan1_result
-    - debug:
-        var: vlan1_result
 
-    - name: Configure VLAN 10 interface
+    - name: Configure interface VLAN 1 IP address
+      ios_config:
+        lines:
+          - interface vlan 1
+          - ip address 10.10.10.21 255.255.254.0
+
+    - name: Enable interface VLAN 1
+      ios_config:
+        lines:
+          - interface vlan 1
+          - no shutdown
+
+    - name: Configure interface VLAN 10 description
       ios_config:
         lines:
           - interface vlan 10
           - description Users
+
+    - name: Enable interface VLAN 10
+      ios_config:
+        lines:
+          - interface vlan 10
           - no shutdown
-      ignore_errors: yes
-      register: vlan10_interface_result
-    - debug:
-        var: vlan10_interface_result
 
     - name: Set default gateway
       ios_config:
         lines:
           - ip default-gateway 10.0.0.1
-      ignore_errors: yes
-      register: gateway_result
-    - debug:
-        var: gateway_result
 
     - name: Set enable secret
       ios_config:
         lines:
           - enable secret cisco
-          - service password-encryption
-      ignore_errors: yes
-      register: enable_secret_result
-    - debug:
-        var: enable_secret_result
 
-    - name: Set domain name and username
+    - name: Enable service password encryption
+      ios_config:
+        lines:
+          - service password-encryption
+
+    - name: Set IP domain name
       ios_config:
         lines:
           - ip domain-name syntra.be
-          - username dajo secret cisco
-      ignore_errors: yes
-      register: domain_user_result
-    - debug:
-        var: domain_user_result
 
-    - name: Configure console line
+    - name: Create user with secret
+      ios_config:
+        lines:
+          - username dajo secret cisco
+
+    - name: Configure console line password
       ios_config:
         lines:
           - line console 0
           - password cisco
-          - login
-      ignore_errors: yes
-      register: console_result
-    - debug:
-        var: console_result
 
-    - name: Configure VTY lines for SSH
+    - name: Enable login on console line
+      ios_config:
+        lines:
+          - line console 0
+          - login
+
+    - name: Configure VTY lines for SSH transport
       ios_config:
         lines:
           - line vty 0 4
           - transport input ssh
+
+    - name: Enable local login on VTY lines
+      ios_config:
+        lines:
+          - line vty 0 4
           - login local
-      ignore_errors: yes
-      register: vty_result
-    - debug:
-        var: vty_result
 
     - name: Generate RSA key
       ios_command:
         commands:
           - crypto key generate rsa
           - 2048
-      ignore_errors: yes
-      register: rsa_result
-    - debug:
-        var: rsa_result
 
-    - name: Configure uplink interfaces
+    - name: Configure uplink interfaces description
       ios_config:
         lines:
           - interface range e0/0 - 1
           - description uplink
-          - switchport access vlan 10
-          - switchport trunk encapsulation dot1q
-          - switchport mode trunk
-          - switchport trunk allowed vlan 1,10,20,30
-          - no shutdown
-      ignore_errors: yes
-      register: uplink_result
-    - debug:
-        var: uplink_result
 
-    - name: Configure user interfaces
-      ios_config:
-        lines:
-          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
-          - description Users
-          - switchport access vlan 10
-          - switchport trunk encapsulation dot1q
-          - switchport mode trunk
-          - switchport trunk allowed vlan 1,10,20,30
-          - no shutdown
-      ignore_errors: yes
-      register: user_interfaces_result
-    - debug:
-        var: user_interfaces_result
-
-    - name: Configure spanning-tree
-      ios_config:
-        lines:
-          - spanning-tree mode rapid-pvst
-          - spanning-tree vlan 1 priority 12288
-          - spanning-tree vlan 10 priority 12288
-          - spanning-tree vlan 20 priority 8192
-          - spanning-tree vlan 30 priority 4096
-      ignore_errors: yes
-      register: spanning_tree_result
-    - debug:
-        var: spanning_tree_result
-
-    - name: Save configuration
-      ios_command:
-        commands:
-          - end
-          - write memory
-      ignore_errors: yes
-      register: save_config_result
-    - debug:
-        var: save_config_result
+    - name: Set upl
