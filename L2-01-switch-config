@@ -40,35 +40,24 @@
           - vlan 10
           - name Users
 
-    - name: Configure interface VLAN 1 description
+    - name: Configure interface VLAN 1
       ios_config:
         lines:
           - interface vlan 1
+        with_items:
           - description IP address
-
-    - name: Configure interface VLAN 1 IP address
-      ios_config:
-        lines:
-          - interface vlan 1
           - ip address "{{ ansible_host }} 255.255.254.0"
-
-    - name: Enable interface VLAN 1
-      ios_config:
-        lines:
-          - interface vlan 1
           - no shutdown
+      ignore_errors: yes
 
-    - name: Configure interface VLAN 10 description
+    - name: Configure interface VLAN 10
       ios_config:
         lines:
           - interface vlan 10
+        with_items:
           - description Users
-
-    - name: Enable interface VLAN 10
-      ios_config:
-        lines:
-          - interface vlan 10
           - no shutdown
+      ignore_errors: yes
 
     - name: Set default gateway
       ios_config:
