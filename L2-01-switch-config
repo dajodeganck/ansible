@@ -17,7 +17,7 @@
     - name: Set hostname
       ios_config:
         lines:
-          - hostname "{{ inventory_hostname }}"
+          - hostname {{ inventory_hostname }}
 
     - name: Remove existing banner motd
       ios_config:
@@ -50,7 +50,7 @@
       ios_config:
         lines:
           - interface vlan 1
-          - ip address "{{ ansible_host }} 255.255.254.0"
+          - ip address {{ ansible_host }} 255.255.254.0
       ignore_errors: yes
 
     - name: Enable interface VLAN 1
