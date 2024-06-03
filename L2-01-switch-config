@@ -1,5 +1,5 @@
 ---
-- name: Configure Cisco switch
+- name: Configure Cisco switches
   hosts: switches
   gather_facts: no
   tasks:
@@ -17,7 +17,7 @@
     - name: Set hostname
       ios_config:
         lines:
-          - hostname SW_L2_1
+          - hostname "{{ inventory_hostname }}"
 
     - name: Remove existing banner motd
       ios_config:
@@ -50,7 +50,7 @@
       ios_config:
         lines:
           - interface vlan 1
-          - ip address 10.10.10.21 255.255.254.0
+          - ip address "{{ ansible_host }} 255.255.254.0"
 
     - name: Enable interface VLAN 1
       ios_config:
@@ -73,7 +73,7 @@
     - name: Set default gateway
       ios_config:
         lines:
-          - ip default-gateway 10.0.0.1
+          - ip default-gateway 192.168.1.254
 
     - name: Set enable secret
       ios_config:
