@@ -36,7 +36,7 @@
         chdir: "/home/semaphore/ansible"
 
     - name: Set Git user name
-      command: git config user.name "dajo"
+      command: git config user.name "dajodeganck"
       args:
         chdir: "/home/semaphore/ansible"
 
