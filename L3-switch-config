@@ -1,6 +1,6 @@
 ---
 - name: Configure Cisco switches
-  hosts: all
+  hosts: switches
   gather_facts: no
   tasks:
     - name: Ensure the switch is in enable mode
