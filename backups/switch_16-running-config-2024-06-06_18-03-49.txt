@@ -1,0 +1,311 @@
+Building configuration...
+
+Current configuration : 7746 bytes
+!
+! Last configuration change at 13:57:07 UTC Thu Jun 6 2024
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service compress-config
+!
+hostname SW_L2_14
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 5 $1$nPuP$gD8N4a9dRJ/gTwsEi0rIg0
+!
+username dajo secret 5 $1$S3lF$j1j0VNDYQKhA/7pAwIbAe.
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
+!
+no ip domain-lookup
+ip domain-name syntra.be
+ip cef
+no ipv6 cef
+!
+!
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+spanning-tree vlan 10 priority 12288
+spanning-tree vlan 44 priority 4096
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ description uplink
+ switchport access vlan 10
+ switchport trunk allowed vlan 10,44
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface Ethernet0/1
+ description uplink
+ switchport access vlan 10
+ switchport trunk allowed vlan 10,44
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface Ethernet0/2
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet0/3
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet1/0
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet1/1
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet1/2
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet1/3
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet2/0
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet2/1
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet2/2
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet2/3
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet3/0
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet3/1
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet3/2
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet3/3
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet4/0
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet4/1
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet4/2
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet4/3
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet5/0
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet5/1
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet5/2
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Ethernet5/3
+ description Users
+ switchport access vlan 10
+ switchport trunk encapsulation dot1q
+ switchport mode access
+!
+interface Vlan10
+ description Users
+ no ip address
+!
+interface Vlan44
+ description management
+ ip address 10.10.44.24 255.255.255.224
+!
+ip default-gateway 10.10.44.10
+ip forward-protocol nd
+!
+ip http server
+ip http secure-server
+!
+ip ssh server algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+ip ssh client algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+!
+!
+!
+!
+snmp-server community public RO
+snmp-server enable traps snmp authentication linkdown linkup coldstart warmstart
+snmp-server enable traps flowmon
+snmp-server enable traps tty
+snmp-server enable traps eigrp
+snmp-server enable traps casa
+snmp-server enable traps ospf state-change
+snmp-server enable traps ospf errors
+snmp-server enable traps ospf retransmit
+snmp-server enable traps ospf lsa
+snmp-server enable traps ospf cisco-specific state-change nssa-trans-change
+snmp-server enable traps ospf cisco-specific state-change shamlink interface
+snmp-server enable traps ospf cisco-specific state-change shamlink neighbor
+snmp-server enable traps ospf cisco-specific errors
+snmp-server enable traps ospf cisco-specific retransmit
+snmp-server enable traps ospf cisco-specific lsa
+snmp-server enable traps ethernet cfm cc mep-up mep-down cross-connect loop config
+snmp-server enable traps ethernet cfm crosscheck mep-missing mep-unknown service-up
+snmp-server enable traps auth-framework sec-violation
+snmp-server enable traps energywise
+snmp-server enable traps pw vc
+snmp-server enable traps l2tun session
+snmp-server enable traps l2tun pseudowire status
+snmp-server enable traps ether-oam
+snmp-server enable traps lisp
+snmp-server enable traps mpls rfc ldp
+snmp-server enable traps mpls ldp
+snmp-server enable traps mpls rfc traffic-eng
+snmp-server enable traps mpls traffic-eng
+snmp-server enable traps mpls fast-reroute protected
+snmp-server enable traps ethernet evc status create delete
+snmp-server enable traps bridge newroot topologychange
+snmp-server enable traps stpx inconsistency root-inconsistency loop-inconsistency
+snmp-server enable traps vtp
+snmp-server enable traps vlancreate
+snmp-server enable traps vlandelete
+snmp-server enable traps ike policy add
+snmp-server enable traps ike policy delete
+snmp-server enable traps ike tunnel start
+snmp-server enable traps ike tunnel stop
+snmp-server enable traps ipsec cryptomap add
+snmp-server enable traps ipsec cryptomap delete
+snmp-server enable traps ipsec cryptomap attach
+snmp-server enable traps ipsec cryptomap detach
+snmp-server enable traps ipsec tunnel start
+snmp-server enable traps ipsec tunnel stop
+snmp-server enable traps ipsec too-many-sas
+snmp-server enable traps bfd
+snmp-server enable traps bgp cbgp2
+snmp-server enable traps cef resource-failure peer-state-change peer-fib-state-change inconsistency
+snmp-server enable traps dlsw
+snmp-server enable traps frame-relay
+snmp-server enable traps frame-relay subif
+snmp-server enable traps hsrp
+snmp-server enable traps ipmulticast
+snmp-server enable traps isis
+snmp-server enable traps msdp
+snmp-server enable traps mvpn
+snmp-server enable traps pim neighbor-change rp-mapping-change invalid-pim-message
+snmp-server enable traps rsvp
+snmp-server enable traps ipsla
+snmp-server enable traps slb real virtual csrp
+snmp-server enable traps syslog
+snmp-server enable traps event-manager
+snmp-server enable traps pki
+snmp-server enable traps ospfv3 state-change
+snmp-server enable traps ospfv3 errors
+snmp-server enable traps ethernet cfm alarm
+snmp-server enable traps mpls vpn
+snmp-server enable traps bulkstat collection transfer
+snmp-server enable traps vrfmib vrf-up vrf-down vnet-trunk-up vnet-trunk-down
+snmp-server host 10.10.44.5 version 2c public 
+!
+control-plane
+!
+banner motd ^CUnauthorized access to this device is prohibited!^C
+!
+line con 0
+ password 7 14141B180F0B
+ logging synchronous
+ login
+line aux 0
+line vty 0 4
+ login local
+ transport input ssh
+!
+!
+!
+end

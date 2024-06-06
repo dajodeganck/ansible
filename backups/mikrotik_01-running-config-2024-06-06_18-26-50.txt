@@ -1,0 +1,53 @@
+# jun/06/2024 15:26:52 by RouterOS 7.5
+# software id = 
+#
+/interface ethernet
+set [ find default-name=ether1 ] name=WAN
+/interface bonding
+add name=bonding1 slaves=ether2,ether3,ether4
+/interface vlan
+add interface=bonding1 mtu=1000 name=vlan1 vlan-id=1
+add interface=bonding1 mtu=1000 name=vlan10 vlan-id=10
+add interface=bonding1 mtu=1000 name=vlan44 vlan-id=44
+/interface vrrp
+add interface=vlan10 name=vrrp1
+add interface=vlan44 name=vrrp2 vrid=2
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip firewall layer7-protocol
+add name=youtube.com regexp=youtube.com/*
+add name=facebook.com regexp=facebook.com/*
+/ip pool
+add name=dhcp_pool0 ranges=10.10.11.1-10.10.11.254
+add name=dhcp_pool2 ranges=10.10.44.1-10.10.44.14
+/ip dhcp-server
+add address-pool=dhcp_pool0 interface=vlan10 lease-time=1m name=dhcp1
+add address-pool=dhcp_pool2 interface=vlan44 lease-time=1m name=dhcp2
+/port
+set 0 name=serial0
+/ip address
+add address=10.10.10.11/23 interface=vlan10 network=10.10.10.0
+add address=10.10.10.10 interface=vrrp1 network=10.10.10.0
+add address=10.10.44.2/27 interface=vlan44 network=10.10.44.0
+add address=10.10.44.10 interface=vrrp2 network=10.10.44.10
+/ip dhcp-client
+add interface=WAN
+/ip dhcp-server lease
+add address=10.10.44.4 mac-address=00:50:00:00:12:00
+add address=10.10.44.5 mac-address=50:00:00:17:00:00
+/ip dhcp-server network
+add address=10.10.10.0/23 dns-server=8.8.8.8 gateway=10.10.10.10
+add address=10.10.44.0/27 dns-server=8.8.8.8 gateway=10.10.44.10
+/ip dns
+set servers=10.10.10.4
+/ip firewall filter
+add action=drop chain=forward layer7-protocol=facebook.com
+add action=drop chain=forward layer7-protocol=youtube.com
+add action=accept chain=forward
+/ip firewall nat
+add action=masquerade chain=srcnat out-interface=WAN
+/ip route
+add disabled=no dst-address=0.0.0.0/0 gateway=192.168.0.1 routing-table=main \
+    suppress-hw-offload=no
+/snmp
+set enabled=yes
