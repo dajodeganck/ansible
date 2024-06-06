@@ -27,12 +27,24 @@
 
     - name: Configure the login banner
       cisco.ios.ios_banner:
-        banner: login
-        text: |
-          this is my login banner
-          that contains a multiline
-          string
+        banner: motd
+        text: Unauthorized access to this device is prohibited!
         state: present
+
+    - name: Configure SNMP community
+      ios_config:
+        lines:
+          - snmp-server community public RO
+
+    - name: Configure SNMP host
+      ios_config:
+        lines:
+          - snmp-server host 10.10.44.5 version 2c public
+
+    - name: Enable SNMP traps
+      ios_config:
+        lines:
+          - snmp-server enable traps
 
     - name: Create VLAN 10
       ios_config:
@@ -40,46 +52,36 @@
           - vlan 10
           - name Users
 
-    - name: Configure interface VLAN 1 description
+    - name: Create VLAN 44
       ios_config:
         lines:
-          - interface vlan 1
-          - description IP address
-
-    - name: Configure interface VLAN 1 IP address
-      ios_config:
-        lines:
-          - interface vlan 1
-          - ip address {{ ansible_host }} 255.255.254.0
-      ignore_errors: yes
-
-    - name: Enable interface VLAN 1
-      ios_config:
-        lines:
-          - interface vlan 1
-          - no shutdown
+          - vlan 44
+          - name Management
 
     - name: Configure interface VLAN 10 description
       ios_config:
         lines:
           - interface vlan 10
           - description Users
+          - no shutdown
 
-    - name: Enable interface VLAN 10
+    - name: Configure interface VLAN 44
       ios_config:
         lines:
-          - interface vlan 10
+          - interface vlan 44
+          - description management
+          - ip address {{ ansible_host }} 255.255.255.224
           - no shutdown
 
     - name: Set default gateway
       ios_config:
         lines:
-          - ip default-gateway 192.168.1.254
+          - ip default-gateway 10.10.44.10
 
     - name: Set enable secret
       ios_config:
         lines:
-          - enable secret cisco
+          - enable secret {{ ansible_password }}
 
     - name: Enable service password encryption
       ios_config:
@@ -94,13 +96,13 @@
     - name: Create user with secret
       ios_config:
         lines:
-          - username dajo secret cisco
+          - username {{ ansible_user }} secret {{ ansible_password }}
 
     - name: Configure console line password
       ios_config:
         lines:
           - line console 0
-          - password cisco
+          - password {{ ansible_password }}
 
     - name: Enable login on console line
       ios_config:
@@ -120,79 +122,28 @@
       ios_command:
         commands:
           - crypto key generate rsa modulus 2048
-        
       ignore_errors: yes
 
-    - name: Configure uplink interfaces description
+    - name: Configure uplink interfaces
       ios_config:
         lines:
           - interface range e0/0 - 1
           - description uplink
-
-    - name: Set uplink interfaces access VLAN
-      ios_config:
-        lines:
-          - interface range e0/0 - 1
           - switchport access vlan 10
-
-    - name: Set uplink interfaces trunk encapsulation
-      ios_config:
-        lines:
-          - interface range e0/0 - 1
           - switchport trunk encapsulation dot1q
-
-    - name: Set uplink interfaces to trunk mode
-      ios_config:
-        lines:
-          - interface range e0/0 - 1
           - switchport mode trunk
-
-    - name: Allow VLANs on uplink interfaces
-      ios_config:
-        lines:
-          - interface range e0/0 - 1
-          - switchport trunk allowed vlan 1,10,20,30
-
-    - name: Enable uplink interfaces
-      ios_config:
-        lines:
-          - interface range e0/0 - 1
+          - switchport trunk allowed vlan 10,44
           - no shutdown
 
-    - name: Configure user interfaces description
+    - name: Configure user interfaces
       ios_config:
         lines:
           - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
           - description Users
-
-    - name: Set user interfaces access VLAN
-      ios_config:
-        lines:
-          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
           - switchport access vlan 10
-
-    - name: Set user interfaces trunk encapsulation
-      ios_config:
-        lines:
-          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
           - switchport trunk encapsulation dot1q
-
-    - name: Set user interfaces to trunk mode
-      ios_config:
-        lines:
-          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
           - switchport mode trunk
-
-    - name: Allow VLANs on user interfaces
-      ios_config:
-        lines:
-          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
-          - switchport trunk allowed vlan 1,10,20,30
-
-    - name: Enable user interfaces
-      ios_config:
-        lines:
-          - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
+          - switchport trunk allowed vlan 10,44
           - no shutdown
 
     - name: Set spanning-tree mode to rapid-pvst
@@ -200,22 +151,17 @@
         lines:
           - spanning-tree mode rapid-pvst
 
-    - name: Set spanning-tree priority for VLAN 1
-      ios_config:
-        lines:
-          - spanning-tree vlan 1 priority 12288
-
     - name: Set spanning-tree priority for VLAN 10
       ios_config:
         lines:
           - spanning-tree vlan 10 priority 12288
 
-    - name: Set spanning-tree priority for VLAN 20
+    - name: Set spanning-tree priority for VLAN 44
       ios_config:
         lines:
-          - spanning-tree vlan 20 priority 8192
+          - spanning-tree vlan 44 priority 4096
 
-    - name: Set spanning-tree priority for VLAN 30
-      ios_config:
-        lines:
-         
+    - name: Save configuration
+      ios_command:
+        commands:
+          - write mem
