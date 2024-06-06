@@ -18,10 +18,16 @@
       command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {{ ansible_user }}@{{ ansible_host }} /export
       register: output
 
-    - name: Save MikroTik configuration to a temporary file
-      copy:
-        content: "{{ output.stdout[0] | default('No configuration data captured') }}"
-        dest: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+    - name: Ensure the backup file is present
+      file:
+        path: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+        state: touch
+
+    - name: Save MikroTik configuration to the file
+      lineinfile:
+        path: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+        line: "{{ item }}"
+      with_items: "{{ output.stdout_lines }}"
 
     - name: Debug MikroTik configuration output
       debug:
