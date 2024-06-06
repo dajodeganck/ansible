@@ -18,7 +18,6 @@
       register: output
 
     - name: Save MikroTik configuration to a temporary file
-      when: ansible_network_os == 'routeros'
       copy:
         content: "{{ output.stdout[0] | default('No configuration data captured') }}"
         dest: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-temp.txt"
