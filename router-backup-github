@@ -13,15 +13,20 @@
         state: directory
         mode: '0755'
 
-    - name: Gather running configuration from Cisco devices
-      ios_command:
-        commands: show running-config
-      register: running_config
+    - name: Get MikroTik Configuration
+      command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {{ ansible_user }}@{{ ansible_host }} /export
+      register: output
 
-    - name: Save running configuration to file
-      copy:
-        content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
-        dest: "/home/semaphore/ansible/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+    - name: Ensure the backup file is present
+      file:
+        path: "/home/semaphore/ansible/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+        state: touch
+
+    - name: Save MikroTik configuration to the file
+      lineinfile:
+        path: "/home/semaphore/ansible/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+        line: "{{ item }}"
+      with_items: "{{ output.stdout_lines }}"
 
     - name: Initialize git repository if it does not exist
       git:
