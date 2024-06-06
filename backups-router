@@ -1,0 +1,25 @@
+---
+- name: Backup Cisco Switches
+  hosts: switches
+  gather_facts: no
+  tasks:
+    - name: Gather current date and time
+      local_action: command date +"%Y-%m-%d_%H-%M-%S"
+      register: datetime
+      changed_when: false
+
+    - name: Create backup directory if it doesn't exist
+      file:
+        path: "/home/semaphore/backups"
+        state: directory
+        mode: '0755'
+
+    - name: Gather running configuration from Cisco devices
+      ios_command:
+        commands: show running-config
+      register: running_config
+
+    - name: Save running configuration to file
+      copy:
+        content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
+        dest: "/home/semaphore/ansible/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
