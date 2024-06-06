@@ -1,5 +1,5 @@
 - name: Backup Cisco Switches
-  hosts: switches
+  hosts: mikrotik_routers
   gather_facts: no
   tasks:
     - name: Gather current date and time
