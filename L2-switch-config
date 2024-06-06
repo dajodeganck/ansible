@@ -116,12 +116,14 @@
           - line vty 0 4
           - transport input ssh
           - login local
+          - exit
       ignore_errors: yes
 
     - name: Generate RSA key
       ios_command:
         commands:
           - crypto key generate rsa modulus 2048
+          - exit
       ignore_errors: yes
 
     - name: Configure uplink interfaces
