@@ -10,7 +10,7 @@
 
     - name: Create backup directory if it doesn't exist
       file:
-        path: "/home/user/backups"
+        path: "/home/semaphore/backups"
         state: directory
         mode: '0755'
 
