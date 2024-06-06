@@ -21,3 +21,6 @@
       copy:
         content: "{{ output.stdout[0] | default('No configuration data captured') }}"
         dest: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+    - name: Debug MikroTik configuration output
+  debug:
+    var: output
