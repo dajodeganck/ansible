@@ -1,6 +1,6 @@
 ---
 - name: Backup Cisco Switches
-  hosts: switches
+  hosts: mikrotik_routers
   gather_facts: no
   tasks:
     - name: Gather current date and time
@@ -22,4 +22,11 @@
     - name: Save running configuration to file
       copy:
         content: "{{ running_config.stdout[0] | default('No configuration data captured') }}"
-        dest: "/home/semaphore/ansible/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+        dest: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+    - name: Get MikroTik Configuration
+      command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {{ ansible_user }}@{{ ansible_host }} /export
+      register: output
+
+    - name: Print MikroTik Configuration
+      debug:
+        msg: "{{ output.stdout_lines }}"
