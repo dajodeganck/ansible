@@ -1,0 +1,34 @@
+---
+- name: Backup MikroTik Routers
+  hosts: mikrotik_routers
+  gather_facts: no
+  tasks:
+    - name: Gather current date and time
+      local_action: command date +"%Y-%m-%d_%H-%M-%S"
+      register: datetime
+      changed_when: false
+
+    - name: Create backup directory if it doesn't exist
+      file:
+        path: "/home/semaphore/backups"
+        state: directory
+        mode: '0755'
+
+    - name: Get MikroTik Configuration
+      command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {{ ansible_user }}@{{ ansible_host }} /export
+      register: output
+
+    - name: Ensure the backup file is present
+      file:
+        path: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+        state: touch
+
+    - name: Save MikroTik configuration to the file
+      lineinfile:
+        path: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
+        line: "{{ item }}"
+      with_items: "{{ output.stdout_lines }}"
+
+    - name: Debug MikroTik configuration output
+      debug:
+        var: output
