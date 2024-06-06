@@ -1,5 +1,5 @@
 ---
-- name: Backup Cisco Switches
+- name: Backup MikroTik Routers
   hosts: mikrotik_routers
   gather_facts: no
   tasks:
@@ -13,11 +13,14 @@
         path: "/home/semaphore/backups"
         state: directory
         mode: '0755'
+
     - name: Get MikroTik Configuration
-      command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {{ ansible_user }}@{{ ansible_host }} /export
+      routeros_command:
+        commands:
+          - /export
       register: output
 
-    - name: Save MikroTik configuration to a temporary file
+    - name: Save MikroTik configuration to a file
       copy:
         content: "{{ output.stdout[0] | default('No configuration data captured') }}"
         dest: "/home/semaphore/backups/{{ inventory_hostname }}-running-config-{{ datetime.stdout }}.txt"
