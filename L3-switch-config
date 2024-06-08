@@ -116,6 +116,7 @@
           - line vty 0 4
           - transport input ssh
           - login local
+      ignore_errors: yes
 
     - name: Generate RSA key
       ios_command:
