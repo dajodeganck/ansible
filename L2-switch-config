@@ -113,10 +113,11 @@
     - name: Configure VTY lines for SSH transport
       ios_config:
         lines:
-          - line vty 0 4
           - transport input ssh
           - login local
-          - exit
+        parents: line vty 0 4
+      ignore_errors: yes
+
       ignore_errors: yes
 
     - name: Generate RSA key
