@@ -118,8 +118,6 @@
         parents: line vty 0 4
       ignore_errors: yes
 
-      ignore_errors: yes
-
     - name: Generate RSA key
       ios_command:
         commands:
