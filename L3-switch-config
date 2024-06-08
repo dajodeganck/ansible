@@ -61,17 +61,17 @@
     - name: Configure interface VLAN 10
       ios_config:
         lines:
-          - interface vlan 10
           - description All users
           - no shutdown
+        parents: interface vlan 10
 
     - name: Configure interface VLAN 44
       ios_config:
         lines:
-          - interface vlan 44
           - description Management
           - ip address {{ ansible_host }} 255.255.255.224
           - no shutdown
+        parents: interface vlan 44
 
     - name: Set default gateway
       ios_config:
@@ -101,21 +101,21 @@
     - name: Configure console line password
       ios_config:
         lines:
-          - line console 0
           - password {{ ansible_password }}
+        parents: line console 0
 
     - name: Enable login on console line
       ios_config:
         lines:
-          - line console 0
           - login
+        parents: line console 0
 
     - name: Configure VTY lines for SSH transport
       ios_config:
         lines:
-          - line vty 0 4
           - transport input ssh
           - login local
+        parents: line vty 0 4
       ignore_errors: yes
 
     - name: Generate RSA key
@@ -127,26 +127,26 @@
     - name: Configure trunk interfaces
       ios_config:
         lines:
-          - interface range e0/0 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 1
           - description used switch ports
           - switchport trunk encapsulation dot1q
           - switchport mode trunk
           - switchport trunk allowed vlan 10,44
           - no shutdown
+        parents: interface range e0/0 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 1
 
     - name: Configure connection to other L3 switch
       ios_config:
         lines:
-          - interface range e4/0 - 3
           - description Connection to other L3 switch
           - channel-group 1 mode active
           - no shutdown
+        parents: interface range e4/0 - 3
 
     - name: Configure Port-channel 1 description
       ios_config:
         lines:
-          - interface Port-channel1
           - description Connected to other L3 (EtherChannel)
+        parents: interface Port-channel1
 
     - name: Configure Port-channel 1 settings
       ios_config:
@@ -155,43 +155,44 @@
           - switchport mode trunk
           - no shutdown
           - port-channel load-balance dst-mac
+        parents: interface Port-channel1
 
     - name: Configure uplink interfaces
       ios_config:
         lines:
-          - interface range e5/1 - 3
           - description Uplink
           - switchport trunk encapsulation dot1q
           - switchport trunk allowed vlan 10,44
           - switchport mode trunk
           - channel-group 2 mode on
           - no shutdown
+        parents: interface range e5/1 - 3
 
     - name: Configure Port-channel 2
       ios_config:
         lines:
-          - interface Port-channel2
           - description Connected to MikroTik bonding1 (EtherChannel)
           - switchport trunk encapsulation dot1q
           - switchport trunk allowed vlan 10,44
           - switchport mode trunk
           - no shutdown
+        parents: interface Port-channel2
 
     - name: Configure management interfaces
       ios_config:
         lines:
-          - interface range e3/2 - 3
           - description Management
           - switchport access vlan 44
           - switchport mode access
           - no shutdown
+        parents: interface range e3/2 - 3
 
     - name: Configure reserve interface
       ios_config:
         lines:
-          - interface e5/0
           - description reserve
           - shutdown
+        parents: interface e5/0
 
     - name: Set spanning-tree mode to rapid-pvst
       ios_config:
