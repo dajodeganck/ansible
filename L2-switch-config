@@ -31,32 +31,17 @@
         text: Unauthorized access to this device is prohibited!
         state: present
 
-    - name: Configure SNMP community
-      ios_config:
-        lines:
-          - snmp-server community public RO
-
-    - name: Configure SNMP host
-      ios_config:
-        lines:
-          - snmp-server host 10.10.44.5 version 2c public
-
-    - name: Enable SNMP traps
-      ios_config:
-        lines:
-          - snmp-server enable traps
-
     - name: Create VLAN 10
       ios_config:
         lines:
           - vlan 10
           - name Users
 
-    - name: Create VLAN 44
+    - name: Create VLAN 99
       ios_config:
         lines:
-          - vlan 44
-          - name Management
+          - vlan 99
+          - name IT
 
     - name: Configure interface VLAN 10 description
       ios_config:
@@ -65,18 +50,18 @@
           - description Users
           - no shutdown
 
-    - name: Configure interface VLAN 44
+    - name: Configure interface VLAN 99
       ios_config:
         lines:
-          - interface vlan 44
-          - description management
+          - interface vlan 99
+          - description IT
           - ip address {{ ansible_host }} 255.255.255.224
           - no shutdown
 
     - name: Set default gateway
       ios_config:
         lines:
-          - ip default-gateway 10.10.44.10
+          - ip default-gateway 10.10.99.10
 
     - name: Set enable secret
       ios_config:
@@ -133,7 +118,7 @@
           - switchport access vlan 10
           - switchport trunk encapsulation dot1q
           - switchport mode trunk
-          - switchport trunk allowed vlan 10,44
+          - switchport trunk allowed vlan 10,99
           - no shutdown
 
     - name: Configure user interfaces
@@ -144,7 +129,7 @@
           - switchport access vlan 10
           - switchport trunk encapsulation dot1q
           - switchport mode trunk
-          - switchport trunk allowed vlan 10,44
+          - switchport trunk allowed vlan 10,99
           - no shutdown
 
     - name: Set spanning-tree mode to rapid-pvst
@@ -157,10 +142,10 @@
         lines:
           - spanning-tree vlan 10 priority 12288
 
-    - name: Set spanning-tree priority for VLAN 44
+    - name: Set spanning-tree priority for VLAN 99
       ios_config:
         lines:
-          - spanning-tree vlan 44 priority 4096
+          - spanning-tree vlan 99 priority 4096
 
     - name: Save configuration
       ios_command:
