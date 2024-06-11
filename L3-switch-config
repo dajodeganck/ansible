@@ -122,7 +122,7 @@
       ios_config:
         lines:
           - description Connection to other L3 switch
-          - channel-group 1 mode {{ ansible_channel-group-1 }}
+          - channel-group 1 mode {{ ansible_channel_group_1 }}
           - no shutdown
         parents: interface range e4/0 - 3
 
