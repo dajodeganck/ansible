@@ -30,33 +30,17 @@
         banner: motd
         text: Unauthorized access to this device is prohibited!
         state: present
-
-    - name: Configure SNMP community
-      ios_config:
-        lines:
-          - snmp-server community public RO
-
-    - name: Configure SNMP host
-      ios_config:
-        lines:
-          - snmp-server host 10.10.44.6 version 2c public
-
-    - name: Enable SNMP traps
-      ios_config:
-        lines:
-          - snmp-server enable traps
-
     - name: Create VLAN 10
       ios_config:
         lines:
           - vlan 10
           - name Users
 
-    - name: Create VLAN 44
+    - name: Create VLAN 99
       ios_config:
         lines:
-          - vlan 44
-          - name Management
+          - vlan 99
+          - name IT
 
     - name: Configure interface VLAN 10
       ios_config:
@@ -65,18 +49,18 @@
           - no shutdown
         parents: interface vlan 10
 
-    - name: Configure interface VLAN 44
+    - name: Configure interface VLAN 99
       ios_config:
         lines:
-          - description Management
+          - description IT
           - ip address {{ ansible_host }} 255.255.255.224
           - no shutdown
-        parents: interface vlan 44
+        parents: interface vlan 99
 
     - name: Set default gateway
       ios_config:
         lines:
-          - ip default-gateway 10.10.44.10
+          - ip default-gateway 10.10.99.10
 
     - name: Set enable secret
       ios_config:
@@ -131,7 +115,7 @@
           - description used switch ports
           - switchport trunk encapsulation dot1q
           - switchport mode trunk
-          - switchport trunk allowed vlan 10,44
+          - switchport trunk allowed vlan 10,99
           - no shutdown
 
     - name: Configure connection to other L3 switch
@@ -162,7 +146,7 @@
         lines:
           - description Uplink
           - switchport trunk encapsulation dot1q
-          - switchport trunk allowed vlan 10,44
+          - switchport trunk allowed vlan 10,99
           - switchport mode trunk
           - channel-group 2 mode on
           - no shutdown
@@ -173,16 +157,16 @@
         lines:
           - description Connected to MikroTik bonding1 (EtherChannel)
           - switchport trunk encapsulation dot1q
-          - switchport trunk allowed vlan 10,44
+          - switchport trunk allowed vlan 10,99
           - switchport mode trunk
           - no shutdown
         parents: interface Port-channel2
 
-    - name: Configure management interfaces
+    - name: Configure IT interfaces
       ios_config:
         lines:
-          - description Management
-          - switchport access vlan 44
+          - description IT
+          - switchport access vlan 99
           - switchport mode access
           - no shutdown
         parents: interface range e3/2 - 3
@@ -204,10 +188,10 @@
         lines:
           - spanning-tree vlan 10 priority 12288
 
-    - name: Set spanning-tree priority for VLAN 44
+    - name: Set spanning-tree priority for VLAN 99
       ios_config:
         lines:
-          - spanning-tree vlan 44 priority 4096
+          - spanning-tree vlan 99 priority 4096
 
     - name: Save configuration
       ios_command:
