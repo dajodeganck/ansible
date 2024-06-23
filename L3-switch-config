@@ -1,6 +1,6 @@
 ---
 - name: Configure Cisco switches
-  hosts: all
+  hosts: switches
   gather_facts: no
   tasks:
     - name: Ensure the switch is in enable mode
@@ -28,68 +28,44 @@
     - name: Configure the login banner
       cisco.ios.ios_banner:
         banner: motd
-        text: |
-          Unauthorized access to this device is prohibited!
+        text: Unauthorized access to this device is prohibited!
         state: present
-
-    - name: Create VLANs and set names
+    - name: Create VLAN 10
       ios_config:
         lines:
           - vlan 10
           - name Users
-          - vlan 44
-          - name Management
-          - vlan 20
-          - name Uplink
-          - vlan 30
-          - name Link_to_other_SW
 
-    - name: Configure interface VLAN 1
+    - name: Create VLAN 99
       ios_config:
         lines:
-          - interface vlan 1
-          - description IP address
-          - ip address {{ ansible_host }} 255.255.254.0
-          - no ip route-cache
-          - no shutdown
+          - vlan 99
+          - name IT
 
     - name: Configure interface VLAN 10
       ios_config:
         lines:
-          - interface vlan 10
           - description All users
           - no shutdown
+        parents: interface vlan 10
 
-    - name: Configure interface VLAN 44
+    - name: Configure interface VLAN 99
       ios_config:
         lines:
-          - interface vlan 44
-          - description Management
+          - description IT
+          - ip address {{ ansible_host }} 255.255.255.224
           - no shutdown
-
-    - name: Configure interface VLAN 20
-      ios_config:
-        lines:
-          - interface vlan 20
-          - description Uplink
-          - no shutdown
-
-    - name: Configure interface VLAN 30
-      ios_config:
-        lines:
-          - interface vlan 30
-          - description Link_to_other_SW
-          - no shutdown
+        parents: interface vlan 99
 
     - name: Set default gateway
       ios_config:
         lines:
-          - ip default-gateway 192.168.1.254
+          - ip default-gateway 10.10.99.10
 
     - name: Set enable secret
       ios_config:
         lines:
-          - enable secret cisco
+          - enable secret {{ ansible_password }}
 
     - name: Enable service password encryption
       ios_config:
@@ -104,21 +80,26 @@
     - name: Create user with secret
       ios_config:
         lines:
-          - username dajo secret cisco
+          - username {{ ansible_user }} secret {{ ansible_password }}
 
     - name: Configure console line password
       ios_config:
         lines:
-          - line console 0
-          - password cisco
+          - password {{ ansible_password }}
+        parents: line console 0
+
+    - name: Enable login on console line
+      ios_config:
+        lines:
           - login
+        parents: line console 0
 
     - name: Configure VTY lines for SSH transport
       ios_config:
         lines:
-          - line vty 0 4
           - transport input ssh
           - login local
+        parents: line vty 0 4
       ignore_errors: yes
 
     - name: Generate RSA key
@@ -127,91 +108,92 @@
           - crypto key generate rsa modulus 2048
       ignore_errors: yes
 
-    - name: Configure switch ports
+    - name: Configure trunk interfaces
       ios_config:
         lines:
           - interface range e0/0 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 1
           - description used switch ports
-          - switchport access vlan 10
-          - no shutdown
-
-    - name: Create EtherChannel 1
-      ios_config:
-        lines:
-          - interface range e4/0 - 3
-          - channel-group 1 mode active
-          - no shutdown
-
-    - name: Create Port-channel 1
-      ios_config:
-        lines:
-          - interface Port-channel1
           - switchport trunk encapsulation dot1q
           - switchport mode trunk
+          - switchport trunk allowed vlan 10,99
           - no shutdown
+
+    - name: Configure connection to other L3 switch
+      ios_config:
+        lines:
+          - description Connection to other L3 switch
+          - channel-group 1 mode {{ ansible_channel_group_1 }}
+          - no shutdown
+        parents: interface range e4/0 - 3
 
     - name: Configure Port-channel 1 description
       ios_config:
         lines:
-          - interface Port-channel1
           - description Connected to other L3 (EtherChannel)
+        parents: interface Port-channel1
 
-    - name: Configure EtherChannel 2
+    - name: Configure Port-channel 1 settings
       ios_config:
         lines:
-          - interface range e5/1 - 3
+          - switchport trunk encapsulation dot1q
+          - switchport mode trunk
+          - no shutdown
+          - port-channel load-balance dst-mac
+        parents: interface Port-channel1
+
+    - name: Configure uplink interfaces
+      ios_config:
+        lines:
           - description Uplink
           - switchport trunk encapsulation dot1q
-          - switchport trunk allowed vlan 1
+          - switchport trunk allowed vlan 10,99
           - switchport mode trunk
           - channel-group 2 mode on
           - no shutdown
+        parents: interface range e5/1 - 3
 
-    - name: Create Port-channel 2
+    - name: Configure Port-channel 2
       ios_config:
         lines:
-          - interface Port-channel2
-          - switchport trunk encapsulation dot1q
-          - switchport trunk allowed vlan 1
-          - switchport mode trunk
-          - no shutdown
-
-    - name: Configure Port-channel 2 description
-      ios_config:
-        lines:
-          - interface Port-channel2
           - description Connected to MikroTik bonding1 (EtherChannel)
+          - switchport trunk encapsulation dot1q
+          - switchport trunk allowed vlan 10,99
+          - switchport mode trunk
+          - no shutdown
+        parents: interface Port-channel2
 
-    - name: Configure management interfaces
+    - name: Configure IT interfaces
       ios_config:
         lines:
-          - interface range e3/2 - 3
-          - description Management
-          - switchport access vlan 44
-          - switchport trunk encapsulation dot1q
-          - switchport mode trunk
-          - switchport trunk allowed vlan 1,10,20,30,44
+          - description IT
+          - switchport access vlan 99
+          - switchport mode access
           - no shutdown
+        parents: interface range e3/2 - 3
 
     - name: Configure reserve interface
       ios_config:
         lines:
-          - interface e5/0
           - description reserve
           - shutdown
+        parents: interface e5/0
 
-    - name: Configure spanning tree
+    - name: Set spanning-tree mode to rapid-pvst
       ios_config:
         lines:
           - spanning-tree mode rapid-pvst
-          - spanning-tree vlan 1 priority 12288
+
+    - name: Set spanning-tree priority for VLAN 10
+      ios_config:
+        lines:
           - spanning-tree vlan 10 priority 12288
-          - spanning-tree vlan 20 priority 8192
-          - spanning-tree vlan 30 priority 4096
-          - spanning-tree vlan 44 priority 4096
+
+    - name: Set spanning-tree priority for VLAN 99
+      ios_config:
+        lines:
+          - spanning-tree vlan 99 priority 4096
 
     - name: Save configuration
       ios_command:
         commands:
-          - end
-          - write memory
+          - write mem
