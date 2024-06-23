@@ -1,0 +1,35 @@
+# jun/23/2024 13:41:31 by RouterOS 7.5
+# software id = 
+#
+/interface ethernet
+set [ find default-name=ether1 ] name=WAN
+/interface bonding
+add name=bonding1 slaves=ether2,ether3,ether4
+/interface vlan
+add interface=bonding1 mtu=1000 name=vlan10 vlan-id=10
+add interface=bonding1 mtu=1000 name=vlan99 vlan-id=99
+/interface vrrp
+add interface=vlan10 name=vrrp1
+add interface=vlan99 name=vrrp2 priority=150 vrid=2
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip pool
+add name=dhcp_pool0 ranges=10.10.10.50-10.10.10.254
+add name=dhcp_pool2 ranges=10.10.99.14-10.10.99.30
+/ip dhcp-server
+add address-pool=dhcp_pool0 interface=vlan10 lease-time=1m name=dhcp1
+add address-pool=dhcp_pool2 interface=vlan99 lease-time=1m name=dhcp2
+/port
+set 0 name=serial0
+/ip address
+add address=10.10.10.12/23 interface=vlan10 network=10.10.10.0
+add address=10.10.10.10 interface=vrrp1 network=10.10.10.0
+add address=10.10.99.1/27 interface=vlan99 network=10.10.99.0
+add address=10.10.99.10 interface=vrrp2 network=10.10.99.10
+/ip dhcp-client
+add interface=WAN
+/ip dhcp-server network
+add address=10.10.10.0/23 dns-server=8.8.8.8 gateway=10.10.10.10
+add address=10.10.99.0/27 dns-server=8.8.8.8 gateway=10.10.99.10
+/ip firewall nat
+add action=masquerade chain=srcnat out-interface=WAN
