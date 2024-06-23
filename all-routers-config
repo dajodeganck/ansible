@@ -12,17 +12,52 @@
         timeout: 30  # Set an appropriate timeout value
       ignore_errors: true  # Optionally ignore errors to continue with further commands
 
-    - name: Additional Configuration Commands
+    - name: Apply configuration to mikrotik_01
       community.routeros.command:
         commands:
           - /interface ethernet set [ find default-name=ether1 ] name=WAN
           - /interface bonding add name=bonding1 slaves=ether2,ether3,ether4
+          - /interface vlan add interface=bonding1 mtu=1000 name=vlan10 vlan-id=10
+          - /interface vlan add interface=bonding1 mtu=1000 name=vlan99 vlan-id=99
+          - /interface vrrp add interface=vlan10 name=vrrp1 priority=150
+          - /interface vrrp add interface=vlan99 name=vrrp2 vrid=2
           - /interface wireless security-profiles set [ find default=yes ] supplicant-identity=MikroTik
-          - /ip pool add name=dhcp_pool0 ranges=10.10.10.13-10.10.10.254
-          - /ip dhcp-server add address-pool=dhcp_pool0 interface=bonding1 name=dhcp1
+          - /ip pool add name=dhcp_pool0 ranges=10.10.11.1-10.10.11.254
+          - /ip pool add name=dhcp_pool2 ranges=10.10.99.1-10.10.99.14
+          - /ip dhcp-server add address-pool=dhcp_pool0 interface=vlan10 lease-time=1m name=dhcp1
+          - /ip dhcp-server add address-pool=dhcp_pool2 interface=vlan99 lease-time=1m name=dhcp2
           - /port set 0 name=serial0
-          - /ip address add address={{ ansible_bond_ip }}/24 interface=bonding1 network=10.10.10.0
+          - /ip address add address=10.10.10.11/23 interface=vlan10 network=10.10.10.0
+          - /ip address add address=10.10.10.10 interface=vrrp1 network=10.10.10.0
+          - /ip address add address=10.10.99.2/27 interface=vlan99 network=10.10.99.0
+          - /ip address add address=10.10.99.10 interface=vrrp2 network=10.10.99.10
           - /ip dhcp-client add interface=WAN
-          - /ip dhcp-server network add address=10.10.10.0/24 dns-server=8.8.8.8 gateway={{ ansible_bond_ip }}
+          - /ip dhcp-server network add address=10.10.10.0/23 dns-server=8.8.8.8 gateway=10.10.10.10
+          - /ip dhcp-server network add address=10.10.99.0/27 dns-server=8.8.8.8 gateway=10.10.99.10
           - /ip firewall nat add action=masquerade chain=srcnat out-interface=WAN
-          - /ip route add disabled=no dst-address=0.0.0.0/0 gateway=10.0.0.1 routing-table=main suppress-hw-offload=no
+      when: inventory_hostname == "mikrotik_01"
+
+    - name: Apply configuration to mikrotik_02
+      community.routeros.command:
+        commands:
+          - /interface ethernet set [ find default-name=ether1 ] name=WAN
+          - /interface bonding add name=bonding1 slaves=ether2,ether3,ether4
+          - /interface vlan add interface=bonding1 mtu=1000 name=vlan10 vlan-id=10
+          - /interface vlan add interface=bonding1 mtu=1000 name=vlan99 vlan-id=99
+          - /interface vrrp add interface=vlan10 name=vrrp1
+          - /interface vrrp add interface=vlan99 name=vrrp2 priority=150 vrid=2
+          - /interface wireless security-profiles set [ find default=yes ] supplicant-identity=MikroTik
+          - /ip pool add name=dhcp_pool0 ranges=10.10.10.50-10.10.10.254
+          - /ip pool add name=dhcp_pool2 ranges=10.10.99.14-10.10.99.30
+          - /ip dhcp-server add address-pool=dhcp_pool0 interface=vlan10 lease-time=1m name=dhcp1
+          - /ip dhcp-server add address-pool=dhcp_pool2 interface=vlan99 lease-time=1m name=dhcp2
+          - /port set 0 name=serial0
+          - /ip address add address=10.10.10.12/23 interface=vlan10 network=10.10.10.0
+          - /ip address add address=10.10.10.10 interface=vrrp1 network=10.10.10.0
+          - /ip address add address=10.10.99.1/27 interface=vlan99 network=10.10.99.0
+          - /ip address add address=10.10.99.10 interface=vrrp2 network=10.10.99.10
+          - /ip dhcp-client add interface=WAN
+          - /ip dhcp-server network add address=10.10.10.0/23 dns-server=8.8.8.8 gateway=10.10.10.10
+          - /ip dhcp-server network add address=10.10.99.0/27 dns-server=8.8.8.8 gateway=10.10.99.10
+          - /ip firewall nat add action=masquerade chain=srcnat out-interface=WAN
+      when: inventory_hostname == "mikrotik_02"
