@@ -30,6 +30,7 @@
         banner: motd
         text: Unauthorized access to this device is prohibited!
         state: present
+
     - name: Create VLAN 10
       ios_config:
         lines:
@@ -111,12 +112,11 @@
     - name: Configure trunk interfaces
       ios_config:
         lines:
-          - interface range e0/0 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 1
-          - description used switch ports
           - switchport trunk encapsulation dot1q
           - switchport mode trunk
           - switchport trunk allowed vlan 10,99
           - no shutdown
+        parents: interface range e0/0 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 1
 
     - name: Configure connection to other L3 switch
       ios_config:
@@ -161,12 +161,16 @@
           - switchport mode trunk
           - no shutdown
         parents: interface Port-channel2
-    - name: configure user interfaces
-      int range e0/0 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 1
-        - description IT
-        - switchport access vlan 99
-        - switchport mode access
-        - no shutdown
+
+    - name: Configure user interfaces
+      ios_config:
+        lines:
+          - description User
+          - switchport access vlan 10
+          - switchport mode access
+          - no shutdown
+        parents: interface range e0/0 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 1
+
     - name: Configure IT interfaces
       ios_config:
         lines:
