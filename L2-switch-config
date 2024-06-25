@@ -126,10 +126,9 @@
         lines:
           - interface range e0/2 - 3, e1/0 - 3, e2/0 - 3, e3/0 - 3, e4/0 - 3, e5/0 - 3
           - description Users
+          - switchport mode access
           - switchport access vlan 10
           - switchport trunk encapsulation dot1q
-          - switchport mode trunk
-          - switchport trunk allowed vlan 10,99
           - no shutdown
 
     - name: Set spanning-tree mode to rapid-pvst
